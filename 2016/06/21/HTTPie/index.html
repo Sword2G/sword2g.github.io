@@ -1,0 +1,890 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="HTTPie," />
+
+
+
+
+
+  <link rel="alternate" href="http://sword2g.github.io/atom.xml" title="No root,no fruit" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="HTTPie 是一个开源的 HTTP 的命令行客户端。其目标是让 CLI 和 web 服务之间的交互尽可能的人性化。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTTPie">
+<meta property="og:url" content="https://github.com/Sword2G/sword2g.github.io/2016/06/21/HTTPie/index.html">
+<meta property="og:site_name" content="No root,no fruit">
+<meta property="og:description" content="HTTPie 是一个开源的 HTTP 的命令行客户端。其目标是让 CLI 和 web 服务之间的交互尽可能的人性化。">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/extendHeaders.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/headers.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/headeres2.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/QueryingString.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/postjson.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/JSOn.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/txt.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/json2.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/uploadfile.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/noredirect.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/redirect.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/download.jpg">
+<meta property="og:updated_time" content="2016-12-27T14:18:27.320Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HTTPie">
+<meta name="twitter:description" content="HTTPie 是一个开源的 HTTP 的命令行客户端。其目标是让 CLI 和 web 服务之间的交互尽可能的人性化。">
+<meta name="twitter:image" content="http://7xum8m.com1.z0.glb.clouddn.com/extendHeaders.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/Sword2G/sword2g.github.io/2016/06/21/HTTPie/"/>
+
+
+
+
+
+  <title> HTTPie | No root,no fruit </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">No root,no fruit</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">just do it！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/resume.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://github.com/Sword2G/sword2g.github.io/2016/06/21/HTTPie/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sword2g">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="No root,no fruit">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                HTTPie
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-06-21T20:57:19+08:00">
+                2016-06-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/WAF/" itemprop="url" rel="index">
+                    <span itemprop="name">WAF</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/06/21/HTTPie/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/06/21/HTTPie/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>HTTPie 是一个开源的 HTTP 的命令行客户端。其目标是让 CLI 和 web 服务之间的交互尽可能的人性化。<br><a id="more"></a></p>
+<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><p><code>apt-get install httpie</code></p>
+<h1 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h1><p>配置文件路径为 ~/.httpie/config.json</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    <span class="attr">"__meta__"</span>: &#123;</div><div class="line">        <span class="attr">"about"</span>: <span class="string">"HTTPie configuration file"</span>,</div><div class="line">        <span class="attr">"help"</span>: <span class="string">"https://github.com/jkbr/httpie#config"</span>,</div><div class="line">        <span class="attr">"httpie"</span>: <span class="string">"0.8.0"</span></div><div class="line">    &#125;,</div><div class="line">    <span class="attr">"default_options"</span>: [],</div><div class="line">    <span class="attr">"implicit_content_type"</span>: <span class="string">"json"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li><p><strong>meta</strong><br>HTTPie 元数据，一般不要更改</p>
+</li>
+<li><p>default_options<br>HTTPie 发送数据包时的默认选项<br>如可以设置输出样式”default_options”: [“–style=fruity”, “–body”],设置默认session为default，”–session=default”,可以使用–no-OPTION撤销默认选项，如 –no-style or –no-session</p>
+</li>
+<li><p>“implicit_content_type”: “json”<br>默认请求的 content_type 类型为 application/json</p>
+</li>
+</ul>
+<h1 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h1><h2 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h2><p><code>http [flags] [METHOD] URL [ITEM [ITEM]]</code></p>
+<h3 id="输出选项"><a href="#输出选项" class="headerlink" title="输出选项"></a>输出选项</h3><ul>
+<li>–headers, -h 只输出响应headers</li>
+<li>–body, -b 只输出响应body</li>
+<li>–verbose, -v 输出响应headers和body</li>
+<li>–print, -p 可以选择如下输出部分<ul>
+<li>H request headers</li>
+<li>B request body</li>
+<li>h response headers</li>
+<li>b response body</li>
+</ul>
+</li>
+</ul>
+<h3 id="shorthand"><a href="#shorthand" class="headerlink" title="shorthand"></a>shorthand</h3><p><code>http :80 -pH</code> 将被扩展成 <code>http http://localhost:80 -pH</code></p>
+<p>GET /foo HTTP/1.1<br>Host: localhost</p>
+<p><code>http :/foo -pH</code> 将被扩展成 <code>http http://localhost/foo -pH</code><br>GET /foo HTTP/1.1<br>Host: localhost:</p>
+<p><code>http :80/foo -pH</code> 将被扩展成 <code>http http://localhost:80/foo -pH</code><br>GET /bar HTTP/1.1<br>Host: localhost:80<br><img src="http://7xum8m.com1.z0.glb.clouddn.com/extendHeaders.jpg" alt=""></p>
+<p>http :<br>GET /bar HTTP/1.1<br>Host: localhost</p>
+<h3 id="Http-Headers"><a href="#Http-Headers" class="headerlink" title="Http Headers"></a>Http Headers</h3><p><code>Name:Value</code><br><code>http http://example.com User-Agent:test_agent -pH</code><br><img src="http://7xum8m.com1.z0.glb.clouddn.com/headers.jpg" alt="Headers"></p>
+<p><code>http example.org User-Agent:Bacon/1.0 &#39;Cookie:valued-visitor=yes;foo=bar&#39; X-Foo:Bar Referer:http://httpie.org/ -pH</code><br><img src="http://7xum8m.com1.z0.glb.clouddn.com/headeres2.jpg" alt=""></p>
+<h3 id="Querying-String"><a href="#Querying-String" class="headerlink" title="Querying String"></a>Querying String</h3><p><code>name==value</code><br><code>http example.org name==123 age==24 -pH</code><br><img src="http://7xum8m.com1.z0.glb.clouddn.com/QueryingString.jpg" alt=""></p>
+<h3 id="Post-Data"><a href="#Post-Data" class="headerlink" title="Post Data"></a>Post Data</h3><h4 id="post"><a href="#post" class="headerlink" title="post"></a>post</h4><p><code>http example.org name=123 age=456 -pH</code><br><img src="http://7xum8m.com1.z0.glb.clouddn.com/postjson.jpg" alt=""></p>
+<h2 id="json"><a href="#json" class="headerlink" title="json"></a>json</h2><p><code>http example.org description:=&#39;{&quot;name&quot;:&quot;sword2g&quot;,&quot;age&quot;:24}&#39; -pHB</code><br><img src="http://7xum8m.com1.z0.glb.clouddn.com/JSOn.jpg" alt="json"></p>
+<h2 id="data-from-file"><a href="#data-from-file" class="headerlink" title="data from file"></a>data from file</h2><h3 id="text-string-json"><a href="#text-string-json" class="headerlink" title="text string/json"></a>text string/json</h3><p><code>http example.org name==sword2g age=@age.txt</code><br><img src="http://7xum8m.com1.z0.glb.clouddn.com/txt.jpg" alt="txtfile"></p>
+<p><code>http example.org description:=@description.json</code><br><img src="http://7xum8m.com1.z0.glb.clouddn.com/json2.jpg" alt="jsonfile"></p>
+<h2 id="upload-file"><a href="#upload-file" class="headerlink" title="upload file"></a>upload file</h2><p><code>http -f POST example.com/ name=sword2g cv@~/test.txt</code><br><img src="http://7xum8m.com1.z0.glb.clouddn.com/uploadfile.jpg" alt="uploadfle"></p>
+<h2 id="认证"><a href="#认证" class="headerlink" title="认证"></a>认证</h2><p><code>http -a username:password example.org</code></p>
+<h2 id="自动重定向"><a href="#自动重定向" class="headerlink" title="自动重定向"></a>自动重定向</h2><p><code>--follow</code><br><code>http httpbin.org/redirect/3</code><br><img src="http://7xum8m.com1.z0.glb.clouddn.com/noredirect.jpg" alt=""></p>
+<p><code>http --follow --all --max-redirects=5 httpbin.org/redirect/3</code><br><img src="http://7xum8m.com1.z0.glb.clouddn.com/redirect.jpg" alt=""></p>
+<h2 id="下载文件"><a href="#下载文件" class="headerlink" title="下载文件"></a>下载文件</h2><p><code>--download -d</code><br><code>http --download example.com</code><br><img src="http://7xum8m.com1.z0.glb.clouddn.com/download.jpg" alt=""></p>
+<h2 id="Sessions"><a href="#Sessions" class="headerlink" title="Sessions"></a>Sessions</h2><figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">http</span> <span class="comment">--session=user1 -a user1:password example.org X-Foo:Bar</span></div><div class="line"><span class="keyword">http</span> <span class="comment">--session=user1 example.org</span></div></pre></td></tr></table></figure>
+<h1 id="More-details-on-Github"><a href="#More-details-on-Github" class="headerlink" title="More details on Github"></a><a href="https://github.com/jkbrzt/httpie">More details on Github</a></h1><p>（完）</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_wechat_pay.jpg" alt="sword2g WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_ali_pay.jpg" alt="sword2g Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/HTTPie/" rel="tag"># HTTPie</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/06/20/WAF-Modsecurity/" rel="next" title="WAF 之 Modsecurity">
+                <i class="fa fa-chevron-left"></i> WAF 之 Modsecurity
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/06/byte-align/" rel="prev" title="Struct 结构与内存对齐">
+                Struct 结构与内存对齐 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/06/21/HTTPie/"
+           data-title="HTTPie" data-url="https://github.com/Sword2G/sword2g.github.io/2016/06/21/HTTPie/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg"
+               alt="sword2g" />
+          <p class="site-author-name" itemprop="name">sword2g</p>
+           
+              <p class="site-description motion-element" itemprop="description">put my notes here</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="http://sword2g.github.io/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/Sword2G" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/2816511392" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.douban.com/people/97199972/" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/birkhoff-lee" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://my.oschina.net/v5871314" title="梦回雪夜观花" target="_blank">梦回雪夜观花</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#安装"><span class="nav-number">1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置文件"><span class="nav-number">2.</span> <span class="nav-text">配置文件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用"><span class="nav-number">3.</span> <span class="nav-text">使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#语法"><span class="nav-number">3.1.</span> <span class="nav-text">语法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#输出选项"><span class="nav-number">3.1.1.</span> <span class="nav-text">输出选项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#shorthand"><span class="nav-number">3.1.2.</span> <span class="nav-text">shorthand</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Http-Headers"><span class="nav-number">3.1.3.</span> <span class="nav-text">Http Headers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Querying-String"><span class="nav-number">3.1.4.</span> <span class="nav-text">Querying String</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Post-Data"><span class="nav-number">3.1.5.</span> <span class="nav-text">Post Data</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#post"><span class="nav-number">3.1.5.1.</span> <span class="nav-text">post</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#json"><span class="nav-number">3.2.</span> <span class="nav-text">json</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#data-from-file"><span class="nav-number">3.3.</span> <span class="nav-text">data from file</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#text-string-json"><span class="nav-number">3.3.1.</span> <span class="nav-text">text string/json</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#upload-file"><span class="nav-number">3.4.</span> <span class="nav-text">upload file</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#认证"><span class="nav-number">3.5.</span> <span class="nav-text">认证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自动重定向"><span class="nav-number">3.6.</span> <span class="nav-text">自动重定向</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#下载文件"><span class="nav-number">3.7.</span> <span class="nav-text">下载文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sessions"><span class="nav-number">3.8.</span> <span class="nav-text">Sessions</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#More-details-on-Github"><span class="nav-number">4.</span> <span class="nav-text">More details on Github</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div align="center" class="powered-by">
+
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a> 
+  and Themed by -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist</a>
+
+
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sword2g</span>
+  
+</div>
+
+
+
+
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sword2g"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

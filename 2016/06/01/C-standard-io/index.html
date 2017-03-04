@@ -1,0 +1,903 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="standard I/O," />
+
+
+
+
+
+  <link rel="alternate" href="http://sword2g.github.io/atom.xml" title="No root,no fruit" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="C/C++ 的输入输出并不是以其语言本身为基础实现的，换句话说，C 和 C++ 本身都没有为输入和输出提供专门的语句结构。输入输出留给了编译器来实现。C 语言的输入输出是由标准 I/O 函数库（stdio.h）来实现的，C++ 是由标准类库（iostream 和 fstream）来实现的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C Standard I/O">
+<meta property="og:url" content="https://github.com/Sword2G/sword2g.github.io/2016/06/01/C-standard-io/index.html">
+<meta property="og:site_name" content="No root,no fruit">
+<meta property="og:description" content="C/C++ 的输入输出并不是以其语言本身为基础实现的，换句话说，C 和 C++ 本身都没有为输入和输出提供专门的语句结构。输入输出留给了编译器来实现。C 语言的输入输出是由标准 I/O 函数库（stdio.h）来实现的，C++ 是由标准类库（iostream 和 fstream）来实现的。">
+<meta property="og:updated_time" content="2016-12-26T13:41:49.545Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="C Standard I/O">
+<meta name="twitter:description" content="C/C++ 的输入输出并不是以其语言本身为基础实现的，换句话说，C 和 C++ 本身都没有为输入和输出提供专门的语句结构。输入输出留给了编译器来实现。C 语言的输入输出是由标准 I/O 函数库（stdio.h）来实现的，C++ 是由标准类库（iostream 和 fstream）来实现的。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/Sword2G/sword2g.github.io/2016/06/01/C-standard-io/"/>
+
+
+
+
+
+  <title> C Standard I/O | No root,no fruit </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">No root,no fruit</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">just do it！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/resume.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://github.com/Sword2G/sword2g.github.io/2016/06/01/C-standard-io/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sword2g">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="No root,no fruit">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                C Standard I/O
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-06-01T21:23:45+08:00">
+                2016-06-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/06/01/C-standard-io/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/06/01/C-standard-io/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>C/C++ 的输入输出并不是以其语言本身为基础实现的，换句话说，C 和 C++ 本身都没有为输入和输出提供专门的语句结构。输入输出留给了编译器来实现。C 语言的输入输出是由标准 I/O 函数库（stdio.h）来实现的，C++ 是由标准类库（iostream 和 fstream）来实现的。<br><a id="more"></a></p>
+<h1 id="流"><a href="#流" class="headerlink" title="流"></a>流</h1><p>C 程序把输入输出看做流，所有的 I/O 操作可以看作是简单的把字节移入或者移出程序。输入流中的字节可能来自键盘、其他存储设备或其他程序，输出流可以流向屏幕、 打印机、存储设备或其他程序。流充当了程序和流源或流目标之间的桥梁，因此，特定I/O设备的细节对程序来说是透明的。</p>
+<h1 id="缓冲"><a href="#缓冲" class="headerlink" title="缓冲"></a>缓冲</h1><p>使用缓冲的目的是为了提高输入输出的效率，减少read、write调用的次数。缓冲区其实就是一块作为中介的内存块，而“读取” 就是从缓冲区复制数据到程序，“写入”就是将数据从程序复制到缓冲区。通常像磁盘驱动器这样的设备以 512 字节的块为单位来传输信息，而程序通常每次只能处理一个字节信息。逐个字节读取然后处理是十分低效的，因为从磁盘读取一个字节需要大量的硬件活动。缓冲区的目的就是为了帮助匹配这两种不同信息传输效率。有了缓冲区就可以先从磁盘读取大块数据，然后再逐字节传送给程序处理。</p>
+<h2 id="键盘缓冲"><a href="#键盘缓冲" class="headerlink" title="键盘缓冲"></a>键盘缓冲</h2><p>键盘每次提供一个字符，事实上无需缓冲，然而对键盘的缓冲可以允许用户在将键入的数据传送给程序之前做更改。这就是为什么很多程序在键入回车以后（刷新输入缓冲区），程序才开始处理输入的数据。</p>
+<h2 id="缓冲类型"><a href="#缓冲类型" class="headerlink" title="缓冲类型"></a>缓冲类型</h2><h3 id="全缓冲"><a href="#全缓冲" class="headerlink" title="全缓冲"></a>全缓冲</h3><p>在填满 I/O 缓冲区之后才进行实际的 I/O 操作。对于驻留在磁盘上的文件，通常是由标准 I/O 库实施全缓冲，在一个流上第一次执行 I/O 操作的时候，相关标准 I/O 将调用 malloc 获得所需的缓冲区。缓冲区在填满的时候自动刷新，或者调用 fflush 进行刷新，fflush 迫使缓冲区数据立即写入而不管缓冲区是否已满。</p>
+<h3 id="行缓冲"><a href="#行缓冲" class="headerlink" title="行缓冲"></a>行缓冲</h3><p>当输入输出中遇到换行符的时候执行 I/O 操作。当流涉及到终端设备时使用行缓冲。</p>
+<h3 id="不缓冲"><a href="#不缓冲" class="headerlink" title="不缓冲"></a>不缓冲</h3><p>不使用缓冲区，直接执行 I/O 操作。标准错误流一般使用不带缓冲的，从而使错误信息尽快的输出。</p>
+<h2 id="ISO-C-缓冲特性"><a href="#ISO-C-缓冲特性" class="headerlink" title="ISO C 缓冲特性"></a>ISO C 缓冲特性</h2><ul>
+<li><p>标准输入和标准输出不指向交互式设备时，他们才是全缓冲。（通常标注输入设备是键盘，标准输出设备是终端或屏幕，可以通过重定向来改变输入输出指向的设备）</p>
+</li>
+<li><p>标准错误绝对不是全缓冲</p>
+</li>
+<li><p>指向终端设备的流是行缓冲，否则是全缓冲</p>
+</li>
+</ul>
+<h2 id="相关函数"><a href="#相关函数" class="headerlink" title="相关函数"></a>相关函数</h2><p><code>void setbuf(FILE *stream, char *buf);</code></p>
+<p>setbuf 函数具有打开和关闭缓冲机制。为了带缓冲进行 I/O，参数 buf 必须指向一个长度为 BUFSIZ (定义在 stdio.h 头文件中)的缓冲区。通常在此之后该流就是全缓冲的，但是如果该流与一个终端设备相关，那么某些系统也可以将其设置为行缓冲。为了关闭缓冲，可以将 buf 参数设置为 NULL。</p>
+<p><code>int setvbuf(FILE *stream, char *buf, int mode, size_t size);</code></p>
+<ul>
+<li><p>mode ：期望缓冲区的类型：</p>
+<ul>
+<li>_IOFBF(满缓冲）：当缓冲区为空时，从流读入数据。或者当缓冲区满时，向流写入数 据。</li>
+<li>_IOLBF(行缓冲）：每次从流中读入一行数据或向流中写入一行数据。<br><em>_IONBF(无缓冲）：直接从流中读入数据或直接向流中写入数据，而没有缓冲区。
+</em>size ：缓冲区内字节的数量</li>
+</ul>
+</li>
+</ul>
+<p>一般而言，应该由系统选择缓冲区的长度并自动分配缓冲区，在关闭流时，标准 I/O 库自动释放缓冲区。</p>
+<h1 id="输入输出相关函数"><a href="#输入输出相关函数" class="headerlink" title="输入输出相关函数"></a>输入输出相关函数</h1><h2 id="打开流"><a href="#打开流" class="headerlink" title="打开流"></a>打开流</h2><p><code>FILE * fopen(const char * restrict path, const char * restrict mode);</code><br>打开一个特定的文件，并把一个流和这个文件相关联</p>
+<p><strong>Note ：以读写方式（mode+）打开一个流的时候具有以下限制：</strong></p>
+<ul>
+<li>输出之后跟输入必须调用 flush 、fseek、fsetpos、rewind</li>
+<li>输入之后跟输出必须调用 fseek、fsetpos、rewind<br><code>FILE freopen(const char restrict filename, const char restrict mode, FILE * restrict stream);</code><br>打开或重新打开一个特定的流（如stdin、stdout、stderr）。函数首先试图关闭这个流，然后用指定的文件和模式重新打开这个流，失败返回NULL，打开成功返回它的第三个参数值。</li>
+</ul>
+<h2 id="关闭流"><a href="#关闭流" class="headerlink" title="关闭流"></a>关闭流</h2><p>int fclose( FILE *fp );</p>
+<p>关闭一个打开的流，成功返回 0 ,失败返回 EOF(-1)。<br>在文件被关闭之前，刷新输出缓冲区中的数据，丢弃输入缓冲区中的数据。如果标准 I/O 库已经为该流自动分配了一个缓冲区，则释放该缓冲区。</p>
+<h2 id="读写流"><a href="#读写流" class="headerlink" title="读写流"></a>读写流</h2><h3 id="非格式化IO"><a href="#非格式化IO" class="headerlink" title="非格式化IO"></a>非格式化IO</h3><h4 id="字符IO"><a href="#字符IO" class="headerlink" title="字符IO"></a>字符IO</h4><h5 id="输入"><a href="#输入" class="headerlink" title="输入"></a>输入</h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">getc</span><span class="params">(FILE *fp)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">fgetc</span><span class="params">(FILE *fp)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">getchar</span><span class="params">(<span class="keyword">void</span>)</span></span>;</div></pre></td></tr></table></figure>
+<p>前两个函数区别在于 getc 可以被实现为宏，fgetc 不可以。因此 getc 调用要快一些。getchar() 等价于 getc(stdin)</p>
+<p><strong>Note ：返回值的类型为 int 这样就可以返回所有字符的值加上一个出错或者到达文件尾的指示值EOF 区分 error/eof，也就是说不能将这三个函数的返回值存储在 char 类型的变量中，因为这些函数的返回值以后还要跟 EOF 作比较。</strong></p>
+<h5 id="区分-error-eof"><a href="#区分-error-eof" class="headerlink" title="区分 error/eof"></a>区分 error/eof</h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">ferror</span><span class="params">(FILE *fp)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">feof</span><span class="params">(FILE *fp)</span></span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">fclearerr</span><span class="params">(FILE *fp)</span></span>;</div></pre></td></tr></table></figure>
+<p>fclearerr 函数清除出错标志和文件尾标志。</p>
+<h5 id="输出"><a href="#输出" class="headerlink" title="输出"></a>输出</h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">putc</span><span class="params">(<span class="keyword">int</span> c, FILE *fp)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">fputc</span><span class="params">(<span class="keyword">int</span> c, FILE *fp)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">putchar</span><span class="params">(<span class="keyword">int</span> c)</span></span>;</div></pre></td></tr></table></figure>
+<p>和输入类似，putc 可以被实现为宏，fputc 不可以。putchar(c) 等价于 putc(c,stdout)</p>
+<h5 id="撤销字符"><a href="#撤销字符" class="headerlink" title="撤销字符"></a>撤销字符</h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">ungetc</span><span class="params">(<span class="keyword">int</span> c, FILE *fp)</span></span>;</div></pre></td></tr></table></figure>
+<p>将之前读出的字符压送回流中（并没有写到底层文件或者设备中，只是将它写回到流缓冲区中），以后可以重新读取。</p>
+<h4 id="行-I-O"><a href="#行-I-O" class="headerlink" title="行 I/O"></a>行 I/O</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"><span class="function"><span class="keyword">char</span> *<span class="title">fgets</span><span class="params">(<span class="keyword">char</span> *<span class="keyword">restrict</span> buf, <span class="keyword">int</span> n, FILE *fp)</span></span>;</div><div class="line"><span class="function"><span class="keyword">char</span> *<span class="title">gets</span><span class="params">(<span class="keyword">char</span> *buf)</span></span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">fputs</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *<span class="keyword">restrict</span> buf, FILE *fp)</span></span></div><div class="line"><span class="keyword">int</span> <span class="title">puts</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *buf)</span></div></pre></td></tr></table></figure>
+<p><strong>Note ：gtes 在读取一行的时候并不存储换行符，puts在输出的时候会在输出后在添加一个换行符，fgets、fputs 与其不同,推荐使用 fgets、fputs，因为 gets 不安全，可能造成缓冲区溢出。</strong></p>
+<h4 id="二进制-I-O"><a href="#二进制-I-O" class="headerlink" title="二进制 I/O"></a>二进制 I/O</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="keyword">size_t</span> fread(<span class="keyword">void</span> *buffer, <span class="keyword">size_t</span> size, <span class="keyword">size_t</span> count, FILE *fp);</div><div class="line"><span class="keyword">size_t</span> fwrite(<span class="keyword">void</span> *buffer, <span class="keyword">size_t</span> size , <span class="keyword">size_t</span> count, FILE *fp);</div></pre></td></tr></table></figure>
+<p>从（向）fp中读或者写 count 个每个大小为 size 的对象<br>对于读，如果返回值小于 count 则需要使用 feof 或 ferror 判断是哪种情况<br>对于写，如果返回值小于 count 则出错</p>
+<h3 id="格式化IO"><a href="#格式化IO" class="headerlink" title="格式化IO"></a>格式化IO</h3><h4 id="输入输出"><a href="#输入输出" class="headerlink" title="输入输出"></a>输入输出</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">scanf</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *<span class="keyword">restrict</span> format, ...)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">fscanf</span><span class="params">(FILE *fp, <span class="keyword">const</span> <span class="keyword">char</span> *<span class="keyword">restrict</span> format, ...)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">sscanf</span><span class="params">(<span class="keyword">char</span> *<span class="keyword">restrict</span> buf, <span class="keyword">const</span> <span class="keyword">char</span> *<span class="keyword">restrict</span> format, ...)</span></span>;</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">printf</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *<span class="keyword">restrict</span> format, ...)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">fprintf</span><span class="params">(FILE *fp, <span class="keyword">const</span> <span class="keyword">char</span> *<span class="keyword">restrict</span> format, ...)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">sprintf</span><span class="params">(<span class="keyword">char</span> *<span class="keyword">restrict</span> buf, <span class="keyword">const</span> <span class="keyword">char</span> *<span class="keyword">restrict</span> format, ...)</span></span>;</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdarg.h&gt;</span></span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">vprintf</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *<span class="keyword">restrict</span> format, va_list arg)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">vfprintf</span><span class="params">(FILE *fp,<span class="keyword">const</span> <span class="keyword">char</span> *<span class="keyword">restrict</span> format, va_list arg)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">vsprintf</span><span class="params">(<span class="keyword">char</span> *<span class="keyword">restrict</span> buf, <span class="keyword">const</span> <span class="keyword">char</span> *<span class="keyword">restrict</span> format, va_list arg)</span></span>;</div></pre></td></tr></table></figure>
+<h4 id="定位流"><a href="#定位流" class="headerlink" title="定位流"></a>定位流</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">long</span> <span class="title">ftell</span><span class="params">(FILE *fp)</span></span>;</div><div class="line"><span class="function"><span class="keyword">long</span> <span class="title">fseek</span><span class="params">(FILE *fp, <span class="keyword">long</span> offset, <span class="keyword">int</span> whence)</span></span>;</div></pre></td></tr></table></figure>
+<ul>
+<li><p>对于二进制文件 以字节为度量单位<br>fseek 的 whence 字段可以为</p>
+<ul>
+<li>SEEK_SET 文件起始位置</li>
+<li>SEEK_CUR 文件当前位置</li>
+<li>SEEK_END 文件结束位置</li>
+</ul>
+</li>
+<li><p>对于文本文件 可能不以字节为单位<br>whence 的值只能为SEEK_SET，而且 offset 的值只能为</p>
+<ul>
+<li>0 后退到文件的起始位置</li>
+<li>对该文件的ftell返回的值</li>
+</ul>
+</li>
+</ul>
+<p><code>void rewind(FILE *fp);</code><br>将一个流设置到文件的起始位置。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">getpos</span><span class="params">(FILE *<span class="keyword">restrict</span> fp, <span class="keyword">fpos_t</span> *<span class="keyword">restrict</span> pos)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">setpos</span><span class="params">(FILE *<span class="keyword">restrict</span> fp, <span class="keyword">const</span> <span class="keyword">fpos_t</span> *pos)</span></span>;</div></pre></td></tr></table></figure>
+<p>将当前位置指示器的值存入由pos指向的对象中，在以后的fsetpos调用时，可以使用此值将流重新定位至该位置。</p>
+<h1 id="参考书籍"><a href="#参考书籍" class="headerlink" title="参考书籍"></a>参考书籍</h1><p><a href="https://book.douban.com/subject/25900403/" target="_blank" rel="external">UNIX环境高级编程（第3版）</a><br><a href="https://book.douban.com/subject/3012360/" target="_blank" rel="external">C和指针</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_wechat_pay.jpg" alt="sword2g WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_ali_pay.jpg" alt="sword2g Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/standard-I-O/" rel="tag"># standard I/O</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/26/syslog/" rel="next" title="Syslog">
+                <i class="fa fa-chevron-left"></i> Syslog
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/20/WAF-Modsecurity/" rel="prev" title="WAF 之 Modsecurity">
+                WAF 之 Modsecurity <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/06/01/C-standard-io/"
+           data-title="C Standard I/O" data-url="https://github.com/Sword2G/sword2g.github.io/2016/06/01/C-standard-io/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg"
+               alt="sword2g" />
+          <p class="site-author-name" itemprop="name">sword2g</p>
+           
+              <p class="site-description motion-element" itemprop="description">put my notes here</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="http://sword2g.github.io/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/Sword2G" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/2816511392" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.douban.com/people/97199972/" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/birkhoff-lee" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://my.oschina.net/v5871314" title="梦回雪夜观花" target="_blank">梦回雪夜观花</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#流"><span class="nav-number">1.</span> <span class="nav-text">流</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#缓冲"><span class="nav-number">2.</span> <span class="nav-text">缓冲</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#键盘缓冲"><span class="nav-number">2.1.</span> <span class="nav-text">键盘缓冲</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#缓冲类型"><span class="nav-number">2.2.</span> <span class="nav-text">缓冲类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#全缓冲"><span class="nav-number">2.2.1.</span> <span class="nav-text">全缓冲</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#行缓冲"><span class="nav-number">2.2.2.</span> <span class="nav-text">行缓冲</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#不缓冲"><span class="nav-number">2.2.3.</span> <span class="nav-text">不缓冲</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ISO-C-缓冲特性"><span class="nav-number">2.3.</span> <span class="nav-text">ISO C 缓冲特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关函数"><span class="nav-number">2.4.</span> <span class="nav-text">相关函数</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#输入输出相关函数"><span class="nav-number">3.</span> <span class="nav-text">输入输出相关函数</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#打开流"><span class="nav-number">3.1.</span> <span class="nav-text">打开流</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关闭流"><span class="nav-number">3.2.</span> <span class="nav-text">关闭流</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#读写流"><span class="nav-number">3.3.</span> <span class="nav-text">读写流</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#非格式化IO"><span class="nav-number">3.3.1.</span> <span class="nav-text">非格式化IO</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#字符IO"><span class="nav-number">3.3.1.1.</span> <span class="nav-text">字符IO</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#输入"><span class="nav-number">3.3.1.1.1.</span> <span class="nav-text">输入</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#区分-error-eof"><span class="nav-number">3.3.1.1.2.</span> <span class="nav-text">区分 error/eof</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#输出"><span class="nav-number">3.3.1.1.3.</span> <span class="nav-text">输出</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#撤销字符"><span class="nav-number">3.3.1.1.4.</span> <span class="nav-text">撤销字符</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#行-I-O"><span class="nav-number">3.3.1.2.</span> <span class="nav-text">行 I/O</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二进制-I-O"><span class="nav-number">3.3.1.3.</span> <span class="nav-text">二进制 I/O</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#格式化IO"><span class="nav-number">3.3.2.</span> <span class="nav-text">格式化IO</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#输入输出"><span class="nav-number">3.3.2.1.</span> <span class="nav-text">输入输出</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#定位流"><span class="nav-number">3.3.2.2.</span> <span class="nav-text">定位流</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考书籍"><span class="nav-number">4.</span> <span class="nav-text">参考书籍</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div align="center" class="powered-by">
+
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a> 
+  and Themed by -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist</a>
+
+
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sword2g</span>
+  
+</div>
+
+
+
+
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sword2g"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

@@ -1,0 +1,901 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Linux Kernel," />
+
+
+
+
+
+  <link rel="alternate" href="http://sword2g.github.io/atom.xml" title="No root,no fruit" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="进程不同于存储在存储介质上的程序，它是处于执行期的程序和与之相关的资源的总称。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux Kernel — Process Management">
+<meta property="og:url" content="https://github.com/Sword2G/sword2g.github.io/2016/07/15/Linux-kernel-Process-Management/index.html">
+<meta property="og:site_name" content="No root,no fruit">
+<meta property="og:description" content="进程不同于存储在存储介质上的程序，它是处于执行期的程序和与之相关的资源的总称。">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/process_pthread_info.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/process_status_switch.jpg">
+<meta property="og:updated_time" content="2016-12-27T15:08:47.107Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux Kernel — Process Management">
+<meta name="twitter:description" content="进程不同于存储在存储介质上的程序，它是处于执行期的程序和与之相关的资源的总称。">
+<meta name="twitter:image" content="http://7xum8m.com1.z0.glb.clouddn.com/process_pthread_info.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/Sword2G/sword2g.github.io/2016/07/15/Linux-kernel-Process-Management/"/>
+
+
+
+
+
+  <title> Linux Kernel — Process Management | No root,no fruit </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">No root,no fruit</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">just do it！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/resume.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://github.com/Sword2G/sword2g.github.io/2016/07/15/Linux-kernel-Process-Management/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sword2g">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="No root,no fruit">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Linux Kernel — Process Management
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-07-15T22:52:22+08:00">
+                2016-07-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/07/15/Linux-kernel-Process-Management/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/15/Linux-kernel-Process-Management/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>进程不同于存储在存储介质上的程序，它是处于执行期的程序和与之相关的资源的总称。<br><a id="more"></a></p>
+<h1 id="Linux进程和线程"><a href="#Linux进程和线程" class="headerlink" title="Linux进程和线程"></a>Linux进程和线程</h1><p>Linux 并不区分进程和线程。不同于 Microsoft Windows，对 Linux 而言，线程是一种轻量级进程（lightweight processes）。实际上，Linux 进程本身也足够轻量（Linux进程的创建所花时间比其他操作系统要少很多）。</p>
+<p>举例来说，假设有一个包含四个线程的进程，Linux 直接创建四个进程，这四个进程共享资源，而对于其他操作系统来说，通常会创建一个进程，并用相应的指针指向此进程中包含的四个线程。</p>
+<h1 id="task-struct-与-task-list"><a href="#task-struct-与-task-list" class="headerlink" title="task_struct 与 task list"></a>task_struct 与 task list</h1><p>Linux 内核中进程的信息主要保存在 task_struct 结构中,每个进程都有一个 task_struct 结构与之对应，而一个个 task_struct 结构是通过 task list (任务队列)这个双向循环链表组织起来。也就是说从任意一个 task_struct 开始，可以很轻松的遍历系统中的所有进程。但是在一个拥有大量进程的系统中通过重复来遍历所欲进程代价是很大的，因此尽量避免这样做。</p>
+<h1 id="task-struct-定义"><a href="#task-struct-定义" class="headerlink" title="task_struct 定义"></a>task_struct 定义</h1><p>task_struct 结构定义在 /include/linux/sched.h 中<br>部分字段如下</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span></span> &#123;</div><div class="line">	<span class="comment">/**</span></div><div class="line">	 * 进程状态，如TASK_RUNNING</div><div class="line">	 */</div><div class="line">	volatile long state;	<span class="comment">/* -1 unrunnable, 0 runnable, &gt;0 stopped */</span></div><div class="line">	void *stack;</div><div class="line">	atomic_t usage;</div><div class="line">	unsigned <span class="keyword">int</span> flags;	<span class="comment">/* per process flags, defined below */</span></div><div class="line">	unsigned <span class="keyword">int</span> ptrace;</div><div class="line"></div><div class="line">	<span class="keyword">int</span> lock_depth;		<span class="comment">/* BKL lock depth */</span></div><div class="line"></div><div class="line">	<span class="comment">/**</span></div><div class="line">	 * static_prio:进程的静态优先级，由启动时分配，nice和sched_setscheduler修改</div><div class="line">	 * prio和normal_prio是动态优先级。</div><div class="line">	 * normal_prio是由调度策略和静态优先级计算出来的优先级。</div><div class="line">	 * prio是运行时的动态优先级。某些情况下内核可能会暂时提升进程的优先级。如优先级继承。</div><div class="line">	 */</div><div class="line">	<span class="keyword">int</span> prio, static_prio, normal_prio;</div><div class="line">	<span class="comment">/* 对于RR实时进程，通过此字段将它加入到RR链表 */</span></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span></span> run_list;</div><div class="line">	<span class="comment">/* 进程所属的调度器类 */</span></div><div class="line">	<span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">sched_class</span></span> *sched_class;</div><div class="line">	<span class="comment">/* sched_entity代表一个调度实体，一个调度实体包含一组进程。这个功能用于cgroup */</span></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sched_entity</span></span> se;</div><div class="line"></div><div class="line">	unsigned short ioprio;</div><div class="line"></div><div class="line">	<span class="comment">/* 进程的调度策略，如SCHED_NORMAL */</span></div><div class="line">	unsigned <span class="keyword">int</span> policy;</div><div class="line">	<span class="comment">/* 进程的CPU亲和性 */</span></div><div class="line">	cpumask_t cpus_allowed;</div><div class="line">	<span class="comment">/* 对于RR进程来说，此字段表示进程可使用CPU的剩余时间段 */</span></div><div class="line">	unsigned <span class="keyword">int</span> time_slice;</div><div class="line"></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span></span> tasks;</div><div class="line"></div><div class="line">	<span class="comment">/* 分别代表用户态地址空间和实际使用的地址空间 */</span></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">mm_struct</span></span> *mm, *active_mm;</div><div class="line"></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span></span> *real_parent; <span class="comment">/* real parent process (when being debugged) */</span></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span></span> *parent;	<span class="comment">/* parent process */</span></div><div class="line">	<span class="comment">/*</span></div><div class="line">	 * children/sibling forms the list of my children plus the</div><div class="line">	 * tasks I'm ptracing.</div><div class="line">	 */</div><div class="line">	<span class="comment">/* 子进程链表头 */</span></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span></span> children;	<span class="comment">/* list of my children */</span></div><div class="line">	<span class="comment">/* 通过此字段链接到父进程的children链表 */</span></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span></span> sibling;	<span class="comment">/* linkage in my parent's children list */</span></div><div class="line">	<span class="comment">/* 线程组的领头进程结构 */</span></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span></span> *group_leader;	<span class="comment">/* threadgroup leader */</span></div><div class="line"></div><div class="line">	<span class="comment">/* PID/PID hash table linkage. */</span></div><div class="line">	<span class="comment">/* 将进程链接到全局pid_hash哈希表的结构 */</span></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">pid_link</span></span> pids[PIDTYPE_MAX];</div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span></span> thread_group;</div><div class="line"></div><div class="line"><span class="comment">/* CPU-specific state of this task */</span></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">thread_struct</span></span> thread;</div><div class="line"><span class="comment">/* filesystem information */</span></div><div class="line">	<span class="comment">/* 进程文件系统相关信息，如当前目录 */</span></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">fs_struct</span></span> *fs;</div><div class="line"><span class="comment">/* open file information */</span></div><div class="line">	<span class="comment">/* 当前进程的文件描述符 */</span></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">files_struct</span></span> *files;</div><div class="line"><span class="comment">/* namespaces */</span></div><div class="line">	<span class="comment">/* 进程所属命名空间 */</span></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">nsproxy</span></span> *nsproxy;</div><div class="line"><span class="comment">/* signal handlers */</span></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">signal_struct</span></span> *signal;</div><div class="line">	<span class="comment">/* 用于管理用户设置的信号处理程序 */</span></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sighand_struct</span></span> *sighand;</div><div class="line"></div><div class="line">	<span class="comment">/* 所有阻塞的信号，是一个位掩码 */</span></div><div class="line">	sigset_t blocked, real_blocked;</div><div class="line">	sigset_t saved_sigmask;		<span class="comment">/* To be restored with TIF_RESTORE_SIGMASK */</span></div><div class="line">	<span class="comment">/* 已经触发、有待处理的信号链表 */</span></div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sigpending</span></span> pending;</div><div class="line"></div><div class="line">	<span class="comment">/* 用户态信号处理栈地址及长度 */</span></div><div class="line">	unsigned long sas_ss_sp;</div><div class="line">	<span class="comment">//进程id</span></div><div class="line">	pid_t pid;</div><div class="line">	...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h1 id="task-struct-的分配"><a href="#task-struct-的分配" class="headerlink" title="task_struct 的分配"></a>task_struct 的分配</h1><p>进程是动态的实体，生命周期不固定，因此内核必须能够处理很多进程，并把 task_struct 存放在动态内存中，而不是放在内核内存区。Linux 是通过 slab 分配器给 task_struct 分配内存的，这样能够达到对象复用和和缓存着色 (cache coloring)的作用。</p>
+<p>实际上，对于每个进程来说，Linux 通过把两个不同的数据结构紧凑的存放在一个单独为进程分配的内存区，一个是与 task_struct 相关的 thread_info 结构，另一个是内核态的进程堆栈，通常这块内存区占两个页框（8KB = 8192 Byte 或者4KB = 4096 Byte）。2.6 以前的内核直接将 task_struct 存放在内核栈的尾端，但现在只在内核栈的尾端存放一个较小的 thread_info 结构，该结构中有一个指向通过 slab 分配的 task_struct 结构的指针。</p>
+<p>进程内核堆栈和 thread_info 的布局如下<br><img src="http://7xum8m.com1.z0.glb.clouddn.com/process_pthread_info.jpg" alt=""></p>
+<p>thread_info 结构定义在 include/asm-x86（Thread_info32.h 后者Thread_in64.h）中<br>部分代码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> thread_info &#123;</div><div class="line">	<span class="comment">/* 指向对应的task_struct结构 */</span></div><div class="line">	<span class="keyword">struct</span> task_struct	*task;		<span class="comment">/* main task structure */</span></div><div class="line">	<span class="comment">/* 执行域，一般用于64位机器上运行32位程序 */</span></div><div class="line">	<span class="keyword">struct</span> exec_domain	*exec_domain;	<span class="comment">/* execution domain */</span></div><div class="line">	<span class="comment">/* 进程标志，如TIF_SIGPENDING */</span></div><div class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span>		flags;		<span class="comment">/* low level flags */</span></div><div class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span>		status;		<span class="comment">/* thread-synchronous flags */</span></div><div class="line">	<span class="comment">/* 当前运行在哪个CPU上 */</span></div><div class="line">	__u32			cpu;		<span class="comment">/* current CPU */</span></div><div class="line">	<span class="comment">/* 抢占计数 */</span></div><div class="line">	<span class="keyword">int</span>			preempt_count;	<span class="comment">/* 0 =&gt; preemptable, &lt;0 =&gt; BUG */</span></div><div class="line">	...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h1 id="task-struct-的存放"><a href="#task-struct-的存放" class="headerlink" title="task_struct 的存放"></a>task_struct 的存放</h1><p>内核通过唯一的进程标识符pid来标识每个进程。pid字段存放在 task_struct 结构中的 pid 字段。通常可以通过current宏（该宏等价于current_thread_info()-&gt;task）来快速获得正在运行进程的 thread_info 结构，然后获得对应的 task_struct 结构指针，内核对进程的所有操作都是通过对 task_struct 结构操作来完成的。</p>
+<h2 id="进程的状态"><a href="#进程的状态" class="headerlink" title="进程的状态"></a>进程的状态</h2><h3 id="TASK-RUNNING"><a href="#TASK-RUNNING" class="headerlink" title="TASK_RUNNING"></a>TASK_RUNNING</h3><p>可运行状态。进程是可运行状态，或正在运行。 对应 ps 中的 R 状态。</p>
+<h3 id="TASK-INTERRUPTIBLE"><a href="#TASK-INTERRUPTIBLE" class="headerlink" title="TASK_INTERRUPTIBLE"></a>TASK_INTERRUPTIBLE</h3><p>可中断睡眠状态。可以响应异步信号，处于这个状态的进程因为等待某某事件的发生（比如等待 socket 连接、等待信号量），而被挂起，处于睡眠(阻塞)状态。这些进程的 task_struct 结构被放入对应事件的等待队列中。当这些事件发生时（由外部中断触发、或由其他进程触发），对应的等待队列中的一个或多个进程将被唤醒。 对应 ps 中的 S 状态。</p>
+<h3 id="TASK-UNINTERRUPTIBLE"><a href="#TASK-UNINTERRUPTIBLE" class="headerlink" title="TASK_UNINTERRUPTIBLE"></a>TASK_UNINTERRUPTIBLE</h3><p>不可中断睡眠状态。与 TASK_INTERRUPTIBLE 状态类似，进程处于睡眠状态，但是此刻进程是不可中断的。不可中断，指的并不是 CPU 不响应外部硬件的中断，而是指进程不响应异步信号。<br>绝大多数情况下，进程处在睡眠状态时，总是应该能够响应异步信号的。处于这种状态下的进程 kill -9 发送 SIGKILL 信号是无法杀死该进程的。<br>ps 命令看到的进程几乎不会出现 TASK_UNINTERRUPTIBLE 状态，TASK_UNINTERRUPTIBLE 状态总是非常短暂的，通过 ps命令基本上不可能捕捉到，对应 ps 中的 D 状态。</p>
+<h3 id="TASK-UNINTERRUPTIBLE-1"><a href="#TASK-UNINTERRUPTIBLE-1" class="headerlink" title="TASK_UNINTERRUPTIBLE"></a>TASK_UNINTERRUPTIBLE</h3><p>状态存在的意义就在于，内核的某些处理流程是不能被打断的。如果响应异步信号，程序的执行流程中就会被插入一段用于处理异步信号的流程（信号处理函数，这个插入的流程可能只存在于内核态，也可能延伸到用户态），于是原有的流程就被中断了。<br>在进程对某些硬件进行操作时（比如进程调用 read 系统调用对某个设备文件进行读操作，而 read 系统调用最终执行到对应设备驱动的代码，并与对应的物理设备进行交互），可能需要使用 TASK_UNINTERRUPTIBLE 状态对进程进行保护，以避免进程与设备交互的过程被打断，造成设备陷入不可控的状态。</p>
+<h3 id="TASK-TRACED"><a href="#TASK-TRACED" class="headerlink" title="TASK_TRACED"></a>TASK_TRACED</h3><p>被跟踪状态。当进程正在被跟踪时，它处于 TASK_TRACED 这个特殊的状态。“正在被跟踪”指的是进程暂停下来，等待跟踪它的进程对它进行操作。比如在 gdb 中对被跟踪的进程下一个断点，进程在断点处停下来的时候就处于 TASK_TRACED 状态。而在其他时候，被跟踪的进程还是处于前面提到的那些状态。对应 ps 中的 T 状态。</p>
+<h3 id="TASK-STOPPED"><a href="#TASK-STOPPED" class="headerlink" title="TASK_STOPPED"></a>TASK_STOPPED</h3><p>停止状态。向进程发送一个 SIGSTOP 信号，它就会因响应该信号而进入 TASK_STOPPED 状态（除非该进程本身处于 TASK_UNINTERRUPTIBLE 状态而不响应信号）对应 ps 中的 T 状态。</p>
+<blockquote>
+<p>TASK_STOPPED 和 TASK_TRACED 状态很类似，都是表示进程暂停下来。<br>而 TASK_TRACED 状态相当于在 TASK_STOPPED 之上多了一层保护，处于 TASK_TRACED 状态的进程不能响应 SIGCONT 信号而被唤醒。只能等到调试进程通过 ptrace 系统调用执行 PTRACE_CONT、PTRACE_DETACH 等操作（通过 ptrace 系统调用的参数指定操作），或调试进程退出，被调试的进程才能恢复 TASK_RUNNING 状态。</p>
+</blockquote>
+<h3 id="EXIT-ZOMBIE"><a href="#EXIT-ZOMBIE" class="headerlink" title="EXIT_ZOMBIE"></a>EXIT_ZOMBIE</h3><p>僵死状态。进程已经退出，等待父进程调用 wait 类函数，获取其 task_struct 中保存的退出状态，释放相应的 task_struct 结构（现在已经是空壳尸体，只有很少的字段有意义，用于保存进程的退出码和一些统计信息）。</p>
+<h2 id="进程状态转换"><a href="#进程状态转换" class="headerlink" title="进程状态转换"></a>进程状态转换</h2><p><img src="http://7xum8m.com1.z0.glb.clouddn.com/process_status_switch.jpg" alt="进程状态转换"></p>
+<h2 id="进程的家族"><a href="#进程的家族" class="headerlink" title="进程的家族"></a>进程的家族</h2><p>task_struct 中的 parent 指针指向其父进程的 task_struct，children 指针指向其子进程链表，sibling 指针指向其兄弟进程的进程链表</p>
+<h1 id="进程的创建"><a href="#进程的创建" class="headerlink" title="进程的创建"></a>进程的创建</h1><h2 id="fork-and-exec"><a href="#fork-and-exec" class="headerlink" title="fork and exec"></a>fork and exec</h2><p>Linux 创建进程分为两步：</p>
+<ul>
+<li>fork() 拷贝当前进程映像</li>
+<li>exec() 读取可执行文件并将其载入地址空间运行</li>
+</ul>
+<h2 id="copy-on-write"><a href="#copy-on-write" class="headerlink" title="copy-on-write"></a>copy-on-write</h2><p>传统的 fork() 直接将父进程的所有资源拷贝到子进程，但是很多时候这个操作是没有意义的，子进程可能马上就通过exec()执行新的程序那么前面进行的拷贝就毫无意义。copy-on-write 机制允许资源的拷贝在需要写的时候再进行，在此之前，以只读的方式与父进程共享同一地址空间，这种延迟拷贝机制节省了很多时间，避免了大量的拷贝。</p>
+<h2 id="fork"><a href="#fork" class="headerlink" title="fork()"></a>fork()</h2><p>fork()函数的实现是通过调用 clone()系统调用来实现的。实际上 fork、vfork 还有线程的创建都是通过向 clone 系统调用传送不同的参数进行的，clone() 函数会调用 do_fork() 函数，它定义在 kernel/fork.c 中。do_fork()中的主要工作由 copy_process() 来完成，具体创建流程如下：</p>
+<ul>
+<li>调用 dup_task_struct() 为新进程分配内核栈、thread_info、task_struct 等，其中的内容与父进程相同</li>
+<li>清理新进程 task_struct 结构字段，很多字段清 0 或设为初始值，使之与父进程区别开</li>
+<li>新进程状态置为 TASK_UNINTERRUPTIBLE，保证不会投入运行</li>
+<li>调用 copy_flags() 更新 task_struct 的 flags 成员。</li>
+<li>调用 alloc_pid() 为新进程分配一个有效的 PID</li>
+<li>根据 clone() 的参数标志，拷贝共享的打开文件、文件系统信息、信号处理函数、进程地址空间、命名空间等</li>
+<li>做一些扫尾工作并返回子进程的指针</li>
+</ul>
+<p>返回 do_fork() 子进程被唤醒，并投入运行，一般来说内核有意选择子进程先执行。</p>
+<h2 id="vfork"><a href="#vfork" class="headerlink" title="vfork()"></a>vfork()</h2><p>类似与 fork() 函数，只是调用 clone() 系统调用时传递的参数不同，通过 vfork()创建子进程，父进程会被阻塞，直到子进程退出或执行 exec() 函数</p>
+<h2 id="线程的创建"><a href="#线程的创建" class="headerlink" title="线程的创建"></a>线程的创建</h2><p>Linux 并区分进程和线程，线程的创建与进程的创建类似，都是抵用 clone() 系统调用，传入一些参数指明需要共享的资源。<br><code>clone(CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND, 0);</code>，产生的结构与 fork() 类似，只是父子进程共享地址空间、文件系统资源、文件描述符和信号处理程序。</p>
+<p>普通的 fork() 通过 <code>clone(SIGCHLD, 0)</code>实现，vfork() 通过 <code>clone(CLONE_VFORK | CLONE_VM | SIGCHLD, 0)</code>实现。</p>
+<h2 id="内核线程的创建"><a href="#内核线程的创建" class="headerlink" title="内核线程的创建"></a>内核线程的创建</h2><p>内核线程和普通线程区别在于内核线程没有独立的地址空间（task_struct 中 mm 字段为NULL）。只在内核空间运行，从不切换到用户空间。</p>
+<p>内核线程是由 kthread 内核线程通过调用 clone() 系统调用创建。<br><code>struct task_struct *kthread_create(int (*threadfn)(void *data), void *data, const char namefmt[], ...)</code><br>新的进程将运行 threadfn 函数， 参数为 data，进程名为 namefmt，新创建的线程处于不可运行状态，需要调用 wake_up_process() 明确的唤醒它。</p>
+<h3 id="常见的内核线程"><a href="#常见的内核线程" class="headerlink" title="常见的内核线程"></a>常见的内核线程</h3><ul>
+<li>keventd 执行 keventd_wq 工作队列当</li>
+<li>kapmd 处理高级电源管理事件</li>
+<li>kswapd 执行内存回收</li>
+<li>pdflush 刷新缓存脏数据到磁盘</li>
+</ul>
+<h2 id="进程的终止"><a href="#进程的终止" class="headerlink" title="进程的终止"></a>进程的终止</h2><p>当一个进程终止时，内核必须释放它所占有的资源并向其父进程发送 SIGCHLD 信号，告知其父进程。<br>进程的析构发生在进程调用 exit() 系统调用时，既可能显示的调用也可能隐式的调用，比如从某个函数的主函数返回(c编译器会在main函数的返回点后面放置 exit() 的代码)当进程接收到它既不能处理也不能忽略的信号或异常时，也可能被动的终止。进程终止的大部分工作由 do_exit() 函数(定义在kernel/exit.c文件中)来完成，其流程如下：</p>
+<ul>
+<li>将task_struct flags字段设为 PF_EXITING</li>
+<li>调用 edl_timer_sync() 删除任一定时器</li>
+<li>调用 acct_update_integrals() 输出记账信息</li>
+<li>调用 exit_mm() 释放占用的 mm_struct ，如果没有进程使用它则直接释放</li>
+<li>调用 sem_exit() 释放用户空间的“信号量”</li>
+<li>调用 exit_files() 递减文件描述符，调用 exit_fs() 递减文件系统数据引用计数，计数为 0 则释放<br>将 task_struct 中的 exit_code 字段设置为 exit() 函数的参数</li>
+<li>调用 exit_notify() 函数通知父进程，若父进程已经退出，则会寻找新的父进程，并把task_struct 中exit_state 字段设置为 EXIT_ZOMBIE</li>
+<li>调用 schedule() 切换到新进程（处于 EXIT_ZOMBIE 状态的进程将会被忽略）</li>
+</ul>
+<h2 id="孤儿进程"><a href="#孤儿进程" class="headerlink" title="孤儿进程"></a>孤儿进程</h2><p>如果父进程比子进程先退出，子进程就会成为孤儿进程，在子进程退出的时候没有相应的父进程来获取其退出状态，这些孤儿进程就会永远处于僵死状态，白白消耗内存。所以 Linux 的机制是先尝试在同一线程组中找一个线程作为其父进程，如果不行，则这些孤儿进程由 init 进程收养。</p>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a href="http://blog.csdn.net/brucexu1978/article/details/7721313" target="_blank" rel="external">http://blog.csdn.net/brucexu1978/article/details/7721313</a><br><a href="https://book.douban.com/subject/6097773/" target="_blank" rel="external">https://book.douban.com/subject/6097773/</a><br>（完）</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_wechat_pay.jpg" alt="sword2g WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_ali_pay.jpg" alt="sword2g Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux-Kernel/" rel="tag"># Linux Kernel</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/07/11/build-lib/" rel="next" title="Linux 下静/动态链接库的使用">
+                <i class="fa fa-chevron-left"></i> Linux 下静/动态链接库的使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/19/Linux-kernel-systemcall/" rel="prev" title="Linux Kernel — System Calls">
+                Linux Kernel — System Calls <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/07/15/Linux-kernel-Process-Management/"
+           data-title="Linux Kernel — Process Management" data-url="https://github.com/Sword2G/sword2g.github.io/2016/07/15/Linux-kernel-Process-Management/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg"
+               alt="sword2g" />
+          <p class="site-author-name" itemprop="name">sword2g</p>
+           
+              <p class="site-description motion-element" itemprop="description">put my notes here</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="http://sword2g.github.io/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/Sword2G" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/2816511392" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.douban.com/people/97199972/" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/birkhoff-lee" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://my.oschina.net/v5871314" title="梦回雪夜观花" target="_blank">梦回雪夜观花</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Linux进程和线程"><span class="nav-number">1.</span> <span class="nav-text">Linux进程和线程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#task-struct-与-task-list"><span class="nav-number">2.</span> <span class="nav-text">task_struct 与 task list</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#task-struct-定义"><span class="nav-number">3.</span> <span class="nav-text">task_struct 定义</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#task-struct-的分配"><span class="nav-number">4.</span> <span class="nav-text">task_struct 的分配</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#task-struct-的存放"><span class="nav-number">5.</span> <span class="nav-text">task_struct 的存放</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#进程的状态"><span class="nav-number">5.1.</span> <span class="nav-text">进程的状态</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TASK-RUNNING"><span class="nav-number">5.1.1.</span> <span class="nav-text">TASK_RUNNING</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TASK-INTERRUPTIBLE"><span class="nav-number">5.1.2.</span> <span class="nav-text">TASK_INTERRUPTIBLE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TASK-UNINTERRUPTIBLE"><span class="nav-number">5.1.3.</span> <span class="nav-text">TASK_UNINTERRUPTIBLE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TASK-UNINTERRUPTIBLE-1"><span class="nav-number">5.1.4.</span> <span class="nav-text">TASK_UNINTERRUPTIBLE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TASK-TRACED"><span class="nav-number">5.1.5.</span> <span class="nav-text">TASK_TRACED</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TASK-STOPPED"><span class="nav-number">5.1.6.</span> <span class="nav-text">TASK_STOPPED</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EXIT-ZOMBIE"><span class="nav-number">5.1.7.</span> <span class="nav-text">EXIT_ZOMBIE</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#进程状态转换"><span class="nav-number">5.2.</span> <span class="nav-text">进程状态转换</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#进程的家族"><span class="nav-number">5.3.</span> <span class="nav-text">进程的家族</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#进程的创建"><span class="nav-number">6.</span> <span class="nav-text">进程的创建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#fork-and-exec"><span class="nav-number">6.1.</span> <span class="nav-text">fork and exec</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#copy-on-write"><span class="nav-number">6.2.</span> <span class="nav-text">copy-on-write</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#fork"><span class="nav-number">6.3.</span> <span class="nav-text">fork()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vfork"><span class="nav-number">6.4.</span> <span class="nav-text">vfork()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线程的创建"><span class="nav-number">6.5.</span> <span class="nav-text">线程的创建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内核线程的创建"><span class="nav-number">6.6.</span> <span class="nav-text">内核线程的创建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#常见的内核线程"><span class="nav-number">6.6.1.</span> <span class="nav-text">常见的内核线程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#进程的终止"><span class="nav-number">6.7.</span> <span class="nav-text">进程的终止</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#孤儿进程"><span class="nav-number">6.8.</span> <span class="nav-text">孤儿进程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考链接"><span class="nav-number">7.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div align="center" class="powered-by">
+
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a> 
+  and Themed by -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist</a>
+
+
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sword2g</span>
+  
+</div>
+
+
+
+
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sword2g"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

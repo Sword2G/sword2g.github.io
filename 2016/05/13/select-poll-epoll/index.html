@@ -1,0 +1,916 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="I/O multiplexing, select, poll, epoll," />
+
+
+
+
+
+  <link rel="alternate" href="http://sword2g.github.io/atom.xml" title="No root,no fruit" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="select, poll, epoll都是IO多路复用的机制，它允许进程指示内核等待多个事件中的任何一个发生，并且在只有一个或者多个事件发生或经历一段指定的时间后才唤醒它。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="I/O多路复用select、poll、epoll">
+<meta property="og:url" content="https://github.com/Sword2G/sword2g.github.io/2016/05/13/select-poll-epoll/index.html">
+<meta property="og:site_name" content="No root,no fruit">
+<meta property="og:description" content="select, poll, epoll都是IO多路复用的机制，它允许进程指示内核等待多个事件中的任何一个发生，并且在只有一个或者多个事件发生或经历一段指定的时间后才唤醒它。">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/hexo_selectselects_events_revents.jpg">
+<meta property="og:updated_time" content="2017-03-03T12:54:39.660Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="I/O多路复用select、poll、epoll">
+<meta name="twitter:description" content="select, poll, epoll都是IO多路复用的机制，它允许进程指示内核等待多个事件中的任何一个发生，并且在只有一个或者多个事件发生或经历一段指定的时间后才唤醒它。">
+<meta name="twitter:image" content="http://7xum8m.com1.z0.glb.clouddn.com/hexo_selectselects_events_revents.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/Sword2G/sword2g.github.io/2016/05/13/select-poll-epoll/"/>
+
+
+
+
+
+  <title> I/O多路复用select、poll、epoll | No root,no fruit </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">No root,no fruit</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">just do it！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/resume.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://github.com/Sword2G/sword2g.github.io/2016/05/13/select-poll-epoll/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sword2g">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="No root,no fruit">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                I/O多路复用select、poll、epoll
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-05-13T09:18:20+08:00">
+                2016-05-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/05/13/select-poll-epoll/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/13/select-poll-epoll/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>select, poll, epoll都是IO多路复用的机制，它允许进程指示内核等待多个事件中的任何一个发生，并且在只有一个或者多个事件发生或经历一段指定的时间后才唤醒它。<br><a id="more"></a></p>
+<h1 id="select-函数"><a href="#select-函数" class="headerlink" title="select 函数"></a>select 函数</h1><h2 id="原型"><a href="#原型" class="headerlink" title="原型"></a>原型</h2><figure class="highlight autoit"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">\<span class="meta">#<span class="meta-keyword">include</span>&amp;lt;sys/types.h&amp;gt;</span></div><div class="line">\<span class="meta">#<span class="meta-keyword">include</span>&amp;lt;sys/times.h&amp;gt;</span></div><div class="line">\<span class="meta">#<span class="meta-keyword">include</span>&amp;lt;sys/select.h&amp;gt;</span></div><div class="line"></div><div class="line"><span class="built_in">int</span> <span class="keyword">select</span>(</div><div class="line"><span class="built_in">int</span> maxfdp1,</div><div class="line">fd_set* readfds,</div><div class="line">fd_set* writefds,</div><div class="line">fd_set* exceptfds,</div><div class="line"><span class="keyword">const</span> struct timeval* timeout</div><div class="line">)<span class="comment">;</span></div></pre></td></tr></table></figure>
+<h2 id="参数解释"><a href="#参数解释" class="headerlink" title="参数解释"></a>参数解释</h2><ul>
+<li>maxfdp1 是一个整数值，是指集合中所有文件描述符的范围，即所有文件描述符的最大值加1</li>
+<li>readfds 要求内核测试的读描述符集</li>
+<li>writefds 要求内核测试的写描述符集</li>
+<li>exceptfds 要求内核测试的异常描述符集</li>
+<li>timeout 要求内核等待的时间</li>
+</ul>
+<h3 id="struct-timeval结构"><a href="#struct-timeval结构" class="headerlink" title="struct timeval结构"></a>struct timeval结构</h3><p>struct timebal{<br>    long tv_sec; //second<br>    long tv_usec; //microsecond<br>}<br>这个参数有三种可能：<br>1 永远等待下去：仅在有一个描述符准备好I/O时才返回。为此，我们将参数设置为空指针。<br>2 等待一段固定的时间 ：在有一个描述符准备好时返回，但是不超过由该参数所指向的timeval结构中指定的秒数和微妙数<br>以上两种情况的等待通常会被进程在等待期间捕获的信号所中断，并从信号处理函数<br>3 根本不等待 ：检查描述符后立即返回，这称为轮询。为此，参数timeval定时器的值必须为0（秒数和微妙数）</p>
+<h3 id="描述符集"><a href="#描述符集" class="headerlink" title="描述符集"></a>描述符集</h3><p>是一个整数数组，其中每个整数中的某一位对应一个描述符。可以通过如下四个宏来操作描述符集。</p>
+<ul>
+<li>void FD_ZERO(fd_set *fdset)            //clear all bits in fdset</li>
+<li>void FD_SET(int fd, fd_set <em>fdset)    //turn on the bit for </em>fd<em> in </em>fdset*</li>
+<li>void FD_CLR(int fd, fd_set <em>fdset)    //turn off the bit for </em>fd<em> in </em>fdset*</li>
+<li>int FD_ISSET(int fd, fd_set <em>fdset)    //is the bit for fd on in </em>fdset*</li>
+</ul>
+<h2 id="返回值"><a href="#返回值" class="headerlink" title="返回值"></a>返回值</h2><p>调用select时，我们指定所关心的描述符的值，该函数返回时，结果将指示那些描述符已经就绪。函数返回时，使用FD_ISSET测试fd_set数据类型中的描述符，描述符集内任何与未就绪描述符对应的位返回时均被清 0 。因此每次重新调用 select 时，都必须再次把所有的描述符集内所关心位置 1 。函数的返回值为跨所有描述符集的已就绪的总位数。如果在任何描述符就绪之前定时器超时，返回 0 。返回 -1 表示出错（如本函数被某个信号中断）</p>
+<h1 id="pselect-函数"><a href="#pselect-函数" class="headerlink" title="pselect 函数"></a>pselect 函数</h1><h2 id="原型-1"><a href="#原型-1" class="headerlink" title="原型"></a>原型</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/select.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;signal.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;time.h&gt;</span></span></div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">pselect</span><span class="params">(</span></span></div><div class="line"><span class="keyword">int</span> maxfdp1,</div><div class="line">fd_set* readfds,</div><div class="line">fd_set* writefds,</div><div class="line">fd_set* exceptfds,</div><div class="line"><span class="keyword">const</span> <span class="keyword">struct</span> timespec* timeout,</div><div class="line"><span class="keyword">const</span> <span class="keyword">sigset_t</span> *sigmask</div><div class="line">);</div></pre></td></tr></table></figure>
+<h2 id="参数解释-1"><a href="#参数解释-1" class="headerlink" title="参数解释"></a>参数解释</h2><ul>
+<li>maxfdp1 是一个整数值，是指集合中所有文件描述符的范围，即所有文件描述符的最大值加1</li>
+<li>readfds 要求内核测试的读描述符集</li>
+<li>writefds 要求内核测试的写描述符集</li>
+<li>exceptfds 要求内核测试的异常描述符集</li>
+<li>timeout 要求内核等待的时间</li>
+<li>sigmask，比 select 多一个参数：一个指向信号掩码的指针。该参数允许程序先禁止递交某些信号，在测试由这些当前被禁止信号的信号处理函数设置的全局变量，然后调用pselect，告诉它重新设置信号掩码</li>
+</ul>
+<h3 id="struct-timespec结构"><a href="#struct-timespec结构" class="headerlink" title="struct timespec结构"></a>struct timespec结构</h3><p>struct timebal{<br>    time_t tv_sec; //second<br>    long tv_nsec; //nanosecond<br>}</p>
+<h2 id="返回值-1"><a href="#返回值-1" class="headerlink" title="返回值"></a>返回值</h2><p>返回就绪描述符数目，若超时返回 0 ，出错返回 -1，然后恢复进程信号掩码重置为调用pselect之前的值。</p>
+<h1 id="poll-函数"><a href="#poll-函数" class="headerlink" title="poll 函数"></a>poll 函数</h1><h2 id="原型-2"><a href="#原型-2" class="headerlink" title="原型"></a>原型</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;poll.h&gt;</span></span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">poll</span><span class="params">(<span class="keyword">struct</span> pollfd *fdarray, <span class="keyword">unsigned</span> <span class="keyword">long</span> nfds, <span class="keyword">int</span> timeout)</span></span>;</div></pre></td></tr></table></figure>
+<h2 id="参数解释-2"><a href="#参数解释-2" class="headerlink" title="参数解释"></a>参数解释</h2><ul>
+<li>fdarray struct pollfd 数组的指针</li>
+<li>nfds 是一个整数值，是指集合中所有文件描述符的范围，即所有文件描述符的最大值加1</li>
+<li>timeout 超时时间 <ul>
+<li>timeout = INFTIM 永远等待</li>
+<li>timeout &lt; 0 立即返回，不阻塞进程</li>
+<li>timeout &gt; 0 等待指定数目的毫秒数</li>
+</ul>
+</li>
+</ul>
+<h3 id="struct-pollfd结构"><a href="#struct-pollfd结构" class="headerlink" title="struct pollfd结构"></a>struct pollfd结构</h3><figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">struct pollfd&#123;</div><div class="line">	int fd<span class="comment">;</span></div><div class="line">	<span class="keyword">short </span>events<span class="comment">;</span></div><div class="line">	<span class="keyword">short </span>revents<span class="comment">;</span></div><div class="line">&#125;<span class="comment">;</span></div></pre></td></tr></table></figure>
+<p>要测试的条件由events成员指定，函数在revents成员中返回该描述符的状态，函数返回时设置这个域。</p>
+<p><img src="http://7xum8m.com1.z0.glb.clouddn.com/hexo_selectselects_events_revents.jpg" alt="events 与 revents"></p>
+<h2 id="返回值-2"><a href="#返回值-2" class="headerlink" title="返回值"></a>返回值</h2><p>定时器超时之前没有任何描述符就绪，返回 0 ，否则返回就绪描述符（结构体中revents域不为0的文件描述符）的个数。<br>发生错误时返回 -1，并设置errno为下列值之一：</p>
+<ul>
+<li>EBADF　　     一个或多个结构体中指定的文件描述符无效。</li>
+<li>EFAULTfds　　 指针指向的地址超出进程的地址空间。</li>
+<li>EINTR　　　　 请求的事件之前产生一个信号，调用可以重新发起。</li>
+<li>EINVALnfds　　参数超出PLIMIT_NOFILE值。</li>
+<li>ENOMEM　　    可用内存不足，无法完成请求。<br>如果不关心某个描述符可以把它对应的 struct poolfd 结构的 fd 字段设置为一个负值。poll 函数将忽略这样的 pollfd 结构的 events 成员，返回时将它的 revents 成员置为 0。</li>
+</ul>
+<h1 id="epoll-函数"><a href="#epoll-函数" class="headerlink" title="epoll 函数"></a>epoll 函数</h1><p>poll和select同样存在一个缺点就是，包含大量文件描述符的数组被整体复制于用户态和内核态的地址空间之间，而不论这些文件描述符是否就绪，它的开销随着文件描述符数量的增加而线性增大。<br>epoll是在2.6内核中提出的，是之前的select和poll的增强版本。相对于select和poll来说，epoll更加灵活，没有描述符限制</p>
+<h2 id="epoll-的接口"><a href="#epoll-的接口" class="headerlink" title="epoll 的接口"></a>epoll 的接口</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/epoll.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_create</span><span class="params">(<span class="keyword">int</span> size)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_ctl</span><span class="params">(<span class="keyword">int</span> epfd, <span class="keyword">int</span> op, <span class="keyword">int</span> fd, <span class="keyword">struct</span> epoll_event *event)</span></span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_wait</span><span class="params">(<span class="keyword">int</span> epfd, <span class="keyword">struct</span> epoll_event * events, <span class="keyword">int</span> maxevents, <span class="keyword">int</span> timeout)</span></span>;</div></pre></td></tr></table></figure>
+<h3 id="epoll-create"><a href="#epoll-create" class="headerlink" title="epoll_create"></a>epoll_create</h3><p>创建一个epoll的句柄，size用来告诉内核这个监听的数目一共有多大。这个参数不同于select()中的第一个参数，给出最大监听的fd+1的值。需要注意的是，当创建好epoll句柄后，它就是会占用一个fd值，在linux下如果查看/proc/进程id/fd/，是能够看到这个fd的，所以在使用完epoll后，必须调用close()关闭，否则可能导致fd被耗尽</p>
+<h3 id="epoll-ctl"><a href="#epoll-ctl" class="headerlink" title="epoll_ctl"></a>epoll_ctl</h3><p>epoll的事件注册函数,不同于select()是在监听事件时告诉内核要监听什么类型的事件，而是在这里先注册要监听的事件类型。</p>
+<h4 id="参数解释-3"><a href="#参数解释-3" class="headerlink" title="参数解释"></a>参数解释</h4><p>*epfd epoll_create()的返回值，</p>
+<ul>
+<li>op 表示动作，用三个宏来表示：<ul>
+<li>EPOLL_CTL_ADD：注册新的fd到epfd中；</li>
+<li>EPOLL_CTL_MOD：修改已经注册的fd的监听事件；</li>
+<li>EPOLL_CTL_DEL：从epfd中删除一个fd；</li>
+</ul>
+</li>
+<li>fd 需要监听的fd</li>
+<li>event 告诉内核需要监听什么事<h4 id="struct-epoll-event-结构"><a href="#struct-epoll-event-结构" class="headerlink" title="struct epoll_event 结构"></a>struct epoll_event 结构</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> epoll_event &#123;</div><div class="line">  <span class="keyword">__uint32_t</span> events;  <span class="comment">/* Epoll events */</span></div><div class="line">  <span class="keyword">epoll_data_t</span> data;  <span class="comment">/* User data variable */</span></div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>events可以是以下几个宏的集合：<br>EPOLLIN ：表示对应的文件描述符可以读（包括对端SOCKET正常关闭）；<br>EPOLLOUT：表示对应的文件描述符可以写；<br>EPOLLPRI：表示对应的文件描述符有紧急的数据可读（这里应该表示有带外数据到来）；<br>EPOLLERR：表示对应的文件描述符发生错误；<br>EPOLLHUP：表示对应的文件描述符被挂断；<br>EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的。<br>EPOLLONESHOT：只监听一次事件，当监听完这次事件之后，如果还需要继续监听这个socket的话，需要再次把这个socket加入到EPOLL队列里</p>
+<h5 id="epoll-data-t结构"><a href="#epoll-data-t结构" class="headerlink" title="epoll_data_t结构"></a>epoll_data_t结构</h5><figure class="highlight crystal"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">typedef <span class="class"><span class="keyword">union</span> <span class="title">epoll_data</span> &#123;</span></div><div class="line">void *ptr;</div><div class="line">int fd;</div><div class="line">__uint32_t u32;</div><div class="line">__uint64_t u64;</div><div class="line">&#125; epoll_data_t;</div></pre></td></tr></table></figure>
+<h3 id="epoll-wait"><a href="#epoll-wait" class="headerlink" title="epoll_wait"></a>epoll_wait</h3><p>等待事件的产生，类似于select()调用。参数events用来从内核得到事件的集合，maxevents告之内核这个events有多大，这个maxevents的值不能大于创建epoll_create()时的size，参数timeout是超时时间（毫秒，0会立即返回，-1将不确定，也有说法说是永久阻塞）。该函数返回需要处理的事件数目，如返回0表示已超时。</p>
+<h2 id="epoll-工作模式"><a href="#epoll-工作模式" class="headerlink" title="epoll 工作模式"></a>epoll 工作模式</h2><p>epoll对文件描述符的操作有两种模式：LT（level trigger）和ET（edge trigger）。LT模式是默认模式。</p>
+<ul>
+<li><p>LT模式：当epoll_wait检测到描述符事件发生并将此事件通知应用程序，应用程序可以不立即处理该事件。下次调用epoll_wait时，会再次响应应用程序并通知此事件。</p>
+</li>
+<li><p>ET模式：当epoll_wait检测到描述符事件发生并将此事件通知应用程序，应用程序必须立即处理该事件。如果不处理，下次调用epoll_wait时，不会再次响应应用程序并通知此事件。</p>
+</li>
+</ul>
+<p>ET模式在很大程度上减少了epoll事件被重复触发的次数，因此效率要比LT模式高。epoll工作在ET模式的时候，必须使用非阻塞套接口，以避免由于一个文件句柄的阻塞读/阻塞写操作把处理多个文件描述符的任务饿死。</p>
+<h1 id="select-poll-epoll区别"><a href="#select-poll-epoll区别" class="headerlink" title="select poll epoll区别"></a>select poll epoll区别</h1><p>1 select，poll实现需要自己不断轮询所有fd集合，直到设备就绪，期间可能要睡眠和唤醒多次交替。而epoll其实也需要调用epoll_wait不断轮询就绪链表，期间也可能多次睡眠和唤醒交替，但是它是设备就绪时，调用回调函数，把就绪fd放入就绪链表中，并唤醒在epoll_wait中进入睡眠的进程。虽然都要睡眠和交替，但是select和poll在“醒着”的时候要遍历整个fd集合，而epoll在“醒着”的时候只要判断一下就绪链表是否为空就行了，这节省了大量的CPU时间。这就是回调机制带来的性能提升。</p>
+<p>2 select，poll每次调用都要把fd集合从用户态往内核态拷贝一次，并且要把current往设备等待队列中挂一次，而epoll只要一次拷贝，而且把current往等待队列上挂也只挂一次（在epoll_wait的开始，注意这里的等待队列并不是设备等待队列，只是一个epoll内部定义的等待队列）。这也能节省不少的开销。</p>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a href="http://www.cnblogs.com/Anker/archive/2013/08/17/3263780.html" target="_blank" rel="external">http://www.cnblogs.com/Anker/archive/2013/08/17/3263780.html</a><br><a href="http://www.cnblogs.com/Anker/p/3265058.html" target="_blank" rel="external">http://www.cnblogs.com/Anker/p/3265058.html</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_wechat_pay.jpg" alt="sword2g WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_ali_pay.jpg" alt="sword2g Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/I-O-multiplexing-select-poll-epoll/" rel="tag"># I/O multiplexing, select, poll, epoll</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/13/I-O-Models/" rel="next" title="I/O 模型">
+                <i class="fa fa-chevron-left"></i> I/O 模型
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/17/socket-options/" rel="prev" title="套接字选项">
+                套接字选项 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/05/13/select-poll-epoll/"
+           data-title="I/O多路复用select、poll、epoll" data-url="https://github.com/Sword2G/sword2g.github.io/2016/05/13/select-poll-epoll/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg"
+               alt="sword2g" />
+          <p class="site-author-name" itemprop="name">sword2g</p>
+           
+              <p class="site-description motion-element" itemprop="description">put my notes here</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="http://sword2g.github.io/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/Sword2G" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/2816511392" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.douban.com/people/97199972/" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/birkhoff-lee" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://my.oschina.net/v5871314" title="梦回雪夜观花" target="_blank">梦回雪夜观花</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#select-函数"><span class="nav-number">1.</span> <span class="nav-text">select 函数</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#原型"><span class="nav-number">1.1.</span> <span class="nav-text">原型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参数解释"><span class="nav-number">1.2.</span> <span class="nav-text">参数解释</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#struct-timeval结构"><span class="nav-number">1.2.1.</span> <span class="nav-text">struct timeval结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#描述符集"><span class="nav-number">1.2.2.</span> <span class="nav-text">描述符集</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#返回值"><span class="nav-number">1.3.</span> <span class="nav-text">返回值</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#pselect-函数"><span class="nav-number">2.</span> <span class="nav-text">pselect 函数</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#原型-1"><span class="nav-number">2.1.</span> <span class="nav-text">原型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参数解释-1"><span class="nav-number">2.2.</span> <span class="nav-text">参数解释</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#struct-timespec结构"><span class="nav-number">2.2.1.</span> <span class="nav-text">struct timespec结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#返回值-1"><span class="nav-number">2.3.</span> <span class="nav-text">返回值</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#poll-函数"><span class="nav-number">3.</span> <span class="nav-text">poll 函数</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#原型-2"><span class="nav-number">3.1.</span> <span class="nav-text">原型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参数解释-2"><span class="nav-number">3.2.</span> <span class="nav-text">参数解释</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#struct-pollfd结构"><span class="nav-number">3.2.1.</span> <span class="nav-text">struct pollfd结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#返回值-2"><span class="nav-number">3.3.</span> <span class="nav-text">返回值</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#epoll-函数"><span class="nav-number">4.</span> <span class="nav-text">epoll 函数</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#epoll-的接口"><span class="nav-number">4.1.</span> <span class="nav-text">epoll 的接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#epoll-create"><span class="nav-number">4.1.1.</span> <span class="nav-text">epoll_create</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#epoll-ctl"><span class="nav-number">4.1.2.</span> <span class="nav-text">epoll_ctl</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#参数解释-3"><span class="nav-number">4.1.2.1.</span> <span class="nav-text">参数解释</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#struct-epoll-event-结构"><span class="nav-number">4.1.2.2.</span> <span class="nav-text">struct epoll_event 结构</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#epoll-data-t结构"><span class="nav-number">4.1.2.2.1.</span> <span class="nav-text">epoll_data_t结构</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#epoll-wait"><span class="nav-number">4.1.3.</span> <span class="nav-text">epoll_wait</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#epoll-工作模式"><span class="nav-number">4.2.</span> <span class="nav-text">epoll 工作模式</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#select-poll-epoll区别"><span class="nav-number">5.</span> <span class="nav-text">select poll epoll区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考链接"><span class="nav-number">6.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div align="center" class="powered-by">
+
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a> 
+  and Themed by -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist</a>
+
+
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sword2g</span>
+  
+</div>
+
+
+
+
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sword2g"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>
