@@ -1,0 +1,856 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Modsecurity, Nginx," />
+
+
+
+
+
+  <link rel="alternate" href="http://sword2g.github.io/atom.xml" title="No root,no fruit" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="Nginxz增加modsecurity，实现WAF。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nginx安装Modsecurity">
+<meta property="og:url" content="https://github.com/Sword2G/sword2g.github.io/2016/09/01/how-to-install-modsecurity-on-Nginx/index.html">
+<meta property="og:site_name" content="No root,no fruit">
+<meta property="og:description" content="Nginxz增加modsecurity，实现WAF。">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/nginx_modsecurity_install.png">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/nginx_modsecurity_Modsecurity_successful.png">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/nginx_modsecurity_result.png">
+<meta property="og:updated_time" content="2017-03-10T09:17:03.191Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Nginx安装Modsecurity">
+<meta name="twitter:description" content="Nginxz增加modsecurity，实现WAF。">
+<meta name="twitter:image" content="http://7xum8m.com1.z0.glb.clouddn.com/nginx_modsecurity_install.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/Sword2G/sword2g.github.io/2016/09/01/how-to-install-modsecurity-on-Nginx/"/>
+
+
+
+
+
+  <title> Nginx安装Modsecurity | No root,no fruit </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">No root,no fruit</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">just do it！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/resume.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://github.com/Sword2G/sword2g.github.io/2016/09/01/how-to-install-modsecurity-on-Nginx/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sword2g">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="No root,no fruit">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Nginx安装Modsecurity
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-09-01T17:03:09+08:00">
+                2016-09-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/WAF/" itemprop="url" rel="index">
+                    <span itemprop="name">WAF</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/09/01/how-to-install-modsecurity-on-Nginx/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/09/01/how-to-install-modsecurity-on-Nginx/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Nginxz增加modsecurity，实现WAF。<br><a id="more"></a></p>
+<h2 id="系统"><a href="#系统" class="headerlink" title="系统"></a>系统</h2><p>OS : Ubuntu 14.04 LTS<br>Nginx : nginx-1.9.9  nginx.org/download/nginx-1.9.9.tar.gz<br>Mosecurity : Mosecurity2.9.1 git@github.com:SpiderLabs/ModSecurity.git</p>
+<h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><h3 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h3><figure class="highlight q"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo apt-<span class="built_in">get</span> install  build-essential libpcre3 libpcre3-<span class="built_in">dev</span> libssl-<span class="built_in">dev</span> libtool autoconf apache2-prefork-<span class="built_in">dev</span> libxml2-<span class="built_in">dev</span> libcurl4-openssl-<span class="built_in">dev</span></div></pre></td></tr></table></figure>
+<h3 id="下载modsecurity、nginx"><a href="#下载modsecurity、nginx" class="headerlink" title="下载modsecurity、nginx"></a>下载modsecurity、nginx</h3><figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">cd <span class="regexp">/usr/</span>src</div><div class="line">sudo git clone git:<span class="regexp">//gi</span>thub.com<span class="regexp">/SpiderLabs/</span>ModSecurity.git</div><div class="line"></div><div class="line">wget nginx.org<span class="regexp">/download/</span>nginx-<span class="number">1.9</span>.<span class="number">9</span>.tar.gz</div></pre></td></tr></table></figure>
+<h3 id="编译Modsecurity"><a href="#编译Modsecurity" class="headerlink" title="编译Modsecurity"></a>编译Modsecurity</h3><figure class="highlight gauss"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">cd Modsecurity</div><div class="line">./autogen.sh</div><div class="line">./configure --<span class="keyword">enable</span>-standalone-module --<span class="keyword">disable</span>-mlogc</div><div class="line"><span class="built_in">make</span></div></pre></td></tr></table></figure>
+<h3 id="编译-Nginx"><a href="#编译-Nginx" class="headerlink" title="编译 Nginx"></a>编译 Nginx</h3><figure class="highlight haml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">cd /usr/src</div><div class="line">tar xzvf nginx-1.9.9.tar.gz</div><div class="line"> </div><div class="line">编译nginx(加入 Modsecurity ),安装</div><div class="line">./configure \</div><div class="line">  -<span class="ruby">-user=www-data \</span></div><div class="line">  -<span class="ruby">-group=www-data \</span></div><div class="line">  -<span class="ruby">-with-pcre-jit \</span></div><div class="line">  -<span class="ruby">-with-debug \</span></div><div class="line">  -<span class="ruby">-with-ipv6 \</span></div><div class="line">  -<span class="ruby">-with-http_ssl_module \</span></div><div class="line">  -<span class="ruby">-add-<span class="class"><span class="keyword">module</span>=/<span class="title">usr</span>/<span class="title">src</span>/<span class="title">ModSecurity</span>/<span class="title">nginx</span>/<span class="title">modsecurity</span></span></span></div><div class="line"></div><div class="line"> make </div><div class="line"> make install</div></pre></td></tr></table></figure>
+<p>编译 nginx 的其他参数可以参考<a href="https://www.nginx.com/resources/wiki/start/topics/tutorials/installoptions/" target="_blank" rel="external">这里</a></p>
+<p>安装结果如下<br><img src="http://7xum8m.com1.z0.glb.clouddn.com/nginx_modsecurity_install.png" alt=""></p>
+<h3 id="配置-nginx"><a href="#配置-nginx" class="headerlink" title="配置 nginx"></a>配置 nginx</h3><p>修改/usr/local/nginx/conf/nginx.conf 的<br><code>user nobody;</code>为’user www-data;’</p>
+<p>创建 /usr/local/nginx/sbin/nginx 软连接，从而可以直接使用nginx命令<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ln -s <span class="regexp">/usr/</span>local<span class="regexp">/nginx/</span>sbin<span class="regexp">/nginx /</span>bin<span class="regexp">/nginx</span></div></pre></td></tr></table></figure></p>
+<p>启动 nginx，查看/usr/local/nginx/log/error.log,若出现类似一下信息说明 Modsecurity 安装成功<br><img src="http://7xum8m.com1.z0.glb.clouddn.com/nginx_modsecurity_Modsecurity_successful.png" alt=""></p>
+<h3 id="配置-Modsecurity"><a href="#配置-Modsecurity" class="headerlink" title="配置 Modsecurity"></a>配置 Modsecurity</h3><p>复制 /usr/src/ModSecurity/modsecurity.conf-recommended 到 /usr/local/nginx/conf/modsecurity.conf,复制cp /usr/src/ModSecurity/unicode.mapping 到 /usr/local/nginx/conf/,modsecurity.conf需要引用 unicode.mapping</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cp <span class="regexp">/usr/</span>src<span class="regexp">/ModSecurity/</span>modsecurity.conf-recommended <span class="regexp">/usr/</span>local<span class="regexp">/nginx/</span>conf/modsecurity.conf</div><div class="line">cp <span class="regexp">/usr/</span>src<span class="regexp">/ModSecurity/</span>unicode.mapping <span class="regexp">/usr/</span>local<span class="regexp">/nginx/</span>conf/</div></pre></td></tr></table></figure>
+<p>修改 Modsecurity.conf，将SecRuleEngine设置为 on</p>
+<h3 id="下载-OWASP-Core-Rule-Set-CRS"><a href="#下载-OWASP-Core-Rule-Set-CRS" class="headerlink" title="下载 OWASP Core Rule Set (CRS)"></a>下载 OWASP Core Rule Set (CRS)</h3><figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd <span class="regexp">/usr/</span>local<span class="regexp">/nginx/</span>conf</div><div class="line">git clone https:<span class="regexp">//gi</span>thub.com<span class="regexp">/SpiderLabs/</span>owasp-modsecurity-crs.git</div></pre></td></tr></table></figure>
+<h4 id="2-x-版本-CRS"><a href="#2-x-版本-CRS" class="headerlink" title="2.x 版本 CRS"></a>2.x 版本 CRS</h4><p>在 owasp-modsecurity-crs 下有很多存放规则的文件夹，例如base_rules、experimental_rules、optional_rules、slr_rules将需要启用的规则用Include指令添加到 modsecurity.conf尾部,如</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">Include</span> owasp-modsecurity-crs/modsecurity_crs_10_setup.<span class="keyword">conf</span></div><div class="line"><span class="keyword">Include</span> owasp-modsecurity-crs/base_rules/modsecurity_crs_41_sql_injection_attacks.<span class="keyword">conf</span></div><div class="line"><span class="keyword">Include</span> owasp-modsecurity-crs/base_rules/modsecurity_crs_41_xss_attacks.<span class="keyword">conf</span></div><div class="line"><span class="keyword">Include</span> owasp-modsecurity-crs/base_rules/modsecurity_crs_40_generic_attacks.<span class="keyword">conf</span></div><div class="line"><span class="keyword">Include</span> owasp-modsecurity-crs/experimental_rules/modsecurity_crs_11_dos_protection.<span class="keyword">conf</span></div><div class="line"><span class="keyword">Include</span> owasp-modsecurity-crs/experimental_rules/modsecurity_crs_11_brute_force.<span class="keyword">conf</span></div><div class="line"><span class="keyword">Include</span> owasp-modsecurity-crs/optional_rules/modsecurity_crs_16_session_hijacking.<span class="keyword">conf</span></div></pre></td></tr></table></figure>
+<h4 id="3-x版本CRS"><a href="#3-x版本CRS" class="headerlink" title="3.x版本CRS"></a>3.x版本CRS</h4><p>修改 crs-setup.conf.example 为 crs-setup.conf.<br>修改 rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example 为 rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf<br>修改 rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf.example 为 rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf<br><figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">cd owasp-modsecurity-crs</div><div class="line">mv crs-setup<span class="selector-class">.conf</span><span class="selector-class">.example</span> crs-setup<span class="selector-class">.conf</span></div><div class="line"></div><div class="line">mv rules/REQUEST-<span class="number">900</span>-EXCLUSION-RULES-BEFORE-CRS<span class="selector-class">.conf</span><span class="selector-class">.example</span> rules/REQUEST-<span class="number">900</span>-EXCLUSION-RULES-BEFORE-CRS<span class="selector-class">.conf</span></div><div class="line">mv rules/RESPONSE-<span class="number">999</span>-EXCLUSION-RULES-AFTER-CRS<span class="selector-class">.conf</span><span class="selector-class">.example</span> rules/RESPONSE-<span class="number">999</span>-EXCLUSION-RULES-AFTER-CRS.conf</div></pre></td></tr></table></figure></p>
+<p>在 /usr/local/nginx/conf 下新建 modsec_includes.conf,内容为需要启用的规则<br><figure class="highlight stata"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">include</span> modsecurity.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/crs-setup.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-901-INITIALIZATION.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-905-COMMON-EXCEPTIONS.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-910-IP-REPUTATION.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-911-METHOD-ENFORCEMENT.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-912-DOS-PROTECTION.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-913-SCANNER-DETECTION.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-921-PROTOCOL-ATTACK.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-930-APPLICATION-ATTACK-LFI.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-931-APPLICATION-ATTACK-RFI.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-932-APPLICATION-ATTACK-RCE.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-933-APPLICATION-ATTACK-PHP.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-941-APPLICATION-ATTACK-XSS.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-943-APPLICATION-ATTACK-SESSION-FIXATION.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/REQUEST-949-BLOCKING-EVALUATION.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/RESPONSE-950-DATA-LEAKAGES.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/RESPONSE-951-DATA-LEAKAGES-SQL.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/RESPONSE-952-DATA-LEAKAGES-JAVA.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/RESPONSE-953-DATA-LEAKAGES-PHP.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/RESPONSE-954-DATA-LEAKAGES-<span class="keyword">IIS</span>.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/RESPONSE-959-BLOCKING-EVALUATION.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/RESPONSE-980-CORRELATION.<span class="keyword">conf</span></div><div class="line"><span class="keyword">include</span> owasp-modsecurity-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.<span class="keyword">conf</span></div></pre></td></tr></table></figure></p>
+<h3 id="启用-modsecurity"><a href="#启用-modsecurity" class="headerlink" title="启用 modsecurity"></a>启用 modsecurity</h3><p>修改 /usr/local/nginx/conf/nginx.conf ，在需要启用 Modsecurity 的 location 开启 Modsecurity</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="section">server</span> &#123;</div><div class="line">  <span class="attribute">listen</span>       <span class="number">80</span>;</div><div class="line">  <span class="attribute">server_name</span>  example.com;</div><div class="line"></div><div class="line">  <span class="attribute">location</span> / &#123;</div><div class="line"></div><div class="line">    <span class="attribute">ModSecurityEnabled</span> <span class="literal">on</span>;</div><div class="line">    <span class="comment"># 2.x版本CRS</span></div><div class="line">    <span class="attribute">ModSecurityConfig</span> modsecurity.conf;</div><div class="line">    <span class="comment"># 3.x版本CRS</span></div><div class="line">    <span class="comment"># ModSecurityConfig modsec_includes.conf;</span></div><div class="line"></div><div class="line">    <span class="attribute">root</span>   html;</div><div class="line">    <span class="attribute">index</span>  index.html index.htm;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="测试-Nginx-with-Modsecurity"><a href="#测试-Nginx-with-Modsecurity" class="headerlink" title="测试 Nginx(with Modsecurity)"></a>测试 Nginx(with Modsecurity)</h3><p>构造攻击payload测试<br><a href="http://192.168.204.131/?param=%22%3Cscript%3Ealert(1);%3C/script%3E%22" target="_blank" rel="external">http://192.168.204.131/?param=%22%3Cscript%3Ealert(1);%3C/script%3E%22</a><br>查看拦截日志如下<br><img src="http://7xum8m.com1.z0.glb.clouddn.com/nginx_modsecurity_result.png" alt=""></p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="https://github.com/SpiderLabs/ModSecurity/wiki">https://github.com/SpiderLabs/ModSecurity/wiki</a><br><a href="https://www.howtoforge.com/tutorial/install-nginx-with-mod_security-on-ubuntu-15-04/" target="_blank" rel="external">https://www.howtoforge.com/tutorial/install-nginx-with-mod_security-on-ubuntu-15-04/</a><br><a href="https://blog.stickleback.dk/nginx-modsec-on-ubuntu-14-04-lts/" target="_blank" rel="external">https://blog.stickleback.dk/nginx-modsec-on-ubuntu-14-04-lts/</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_wechat_pay.jpg" alt="sword2g WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_ali_pay.jpg" alt="sword2g Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Modsecurity-Nginx/" rel="tag"># Modsecurity, Nginx</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/26/SEnginx-Reverse-Proxy/" rel="next" title="SEnginx 反向代理搭建测试">
+                <i class="fa fa-chevron-left"></i> SEnginx 反向代理搭建测试
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/09/01/how-to-install-modsecurity-on-Nginx/"
+           data-title="Nginx安装Modsecurity" data-url="https://github.com/Sword2G/sword2g.github.io/2016/09/01/how-to-install-modsecurity-on-Nginx/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg"
+               alt="sword2g" />
+          <p class="site-author-name" itemprop="name">sword2g</p>
+           
+              <p class="site-description motion-element" itemprop="description">put my notes here</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="http://sword2g.github.io/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/Sword2G" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/2816511392" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.douban.com/people/97199972/" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/birkhoff-lee" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://my.oschina.net/v5871314" title="梦回雪夜观花" target="_blank">梦回雪夜观花</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#系统"><span class="nav-number">1.</span> <span class="nav-text">系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#步骤"><span class="nav-number">2.</span> <span class="nav-text">步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装依赖"><span class="nav-number">2.1.</span> <span class="nav-text">安装依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#下载modsecurity、nginx"><span class="nav-number">2.2.</span> <span class="nav-text">下载modsecurity、nginx</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编译Modsecurity"><span class="nav-number">2.3.</span> <span class="nav-text">编译Modsecurity</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编译-Nginx"><span class="nav-number">2.4.</span> <span class="nav-text">编译 Nginx</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-nginx"><span class="nav-number">2.5.</span> <span class="nav-text">配置 nginx</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-Modsecurity"><span class="nav-number">2.6.</span> <span class="nav-text">配置 Modsecurity</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#下载-OWASP-Core-Rule-Set-CRS"><span class="nav-number">2.7.</span> <span class="nav-text">下载 OWASP Core Rule Set (CRS)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-x-版本-CRS"><span class="nav-number">2.7.1.</span> <span class="nav-text">2.x 版本 CRS</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-x版本CRS"><span class="nav-number">2.7.2.</span> <span class="nav-text">3.x版本CRS</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启用-modsecurity"><span class="nav-number">2.8.</span> <span class="nav-text">启用 modsecurity</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试-Nginx-with-Modsecurity"><span class="nav-number">2.9.</span> <span class="nav-text">测试 Nginx(with Modsecurity)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">2.10.</span> <span class="nav-text">参考</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div align="center" class="powered-by">
+
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a> 
+  and Themed by -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist</a>
+
+
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sword2g</span>
+  
+</div>
+
+
+
+
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sword2g"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>
