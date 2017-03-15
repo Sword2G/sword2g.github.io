@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://github.com/Sword2G/sword2g.github.io/"/>
-  <updated>2017-03-10T09:17:03.191Z</updated>
+  <updated>2017-03-15T06:54:58.717Z</updated>
   <id>https://github.com/Sword2G/sword2g.github.io/</id>
   
   <author>
@@ -14,6 +14,38 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Nginx 的高并发性</title>
+    <link href="https://github.com/Sword2G/sword2g.github.io/2016/09/10/nginx-concurrency/"/>
+    <id>https://github.com/Sword2G/sword2g.github.io/2016/09/10/nginx-concurrency/</id>
+    <published>2016-09-10T04:31:19.000Z</published>
+    <updated>2017-03-15T06:54:58.717Z</updated>
+    
+    <content type="html"><![CDATA[<p>Nginx的高并发性取决于它的进程模型和事件模型，最主要的原因是 Nginx worker 进程异步非阻塞的处理方式。<br><a id="more"></a></p>
+<h1 id="Nginx-进程模型"><a href="#Nginx-进程模型" class="headerlink" title="Nginx 进程模型"></a>Nginx 进程模型</h1><p>Nginx默认的工作方式是多进程，启动后会有一个master进程和多个worker进程。<br><img src="http://7xum8m.com1.z0.glb.clouddn.com/hexo-nginx-processers.png" alt="Nginx进程模型"></p>
+<h2 id="master-进程"><a href="#master-进程" class="headerlink" title="master 进程"></a>master 进程</h2><p>master 进程充当整个进程组与用户的交互接口，主要充当管理者，用来管理worker进程（接收来自外界的信号，向各worker进程发送信号，监控 worker 进程的运行状态，当 worker 进程异常退出后，会自动重新启动新的 worker 进程）。它不需要处理网络事件，不负责业务的执行，只会通过管理 worker 进程来实现重启服务、平滑升级、更换日志文件、配置文件实时生效等功能。要想对 nginx 进行管理，只要和 master 进程通信就可以了，master进程会接收来自外界发来的信号，再根据信号做不同的事情。比如 kill -HUP pid，则是告诉 nginx，从容地重启 n ginx，我们一般用这个信号来重启 nginx，或重新加载配置，因为是从容地重启，因此服务是不中断的。master进程在接收到HUP信号后，首先会先重新加载配置文件，然后再启动新的 worker 进程，并向所有老的 worker 进程发送信号，告诉他们可以光荣退休了。新的 worker 在启动后，就开始接收新的请求，而老的 worker 在收到来自 master 的信号后，就不再接收新的请求，并且在当前进程中的所有未处理完的请求处理完成后，再退出。</p>
+<h2 id="worker-进程"><a href="#worker-进程" class="headerlink" title="worker 进程"></a>worker 进程</h2><p>worker 进程主要用来处理各个基本的网络事件。<strong>每个 worker 进程里面只有一个主线程</strong>。多个 worker 进程之间是对等的，他们同等竞争来自客户端的请求，各进程互相之间是独立的。一个请求，只可能在一个 worker进程中处理，一个 worker 进程，不可能处理其它进程的请求。当一个 worker 进程在获得处理请求的机会后，就开始读取请求，解析请求，处理请求，产生数据后，再返回给客户端，最后才断开连接，这样一个完整的请求就是这样的了。我们可以看到，一个请求，完全由一个worker进程来处理，不涉及其他 worker 进程。worker 进程的个数是可以设置的，一般我们会设置与机器 cpu 核数一致。</p>
+<h1 id="Nginx-事件模型"><a href="#Nginx-事件模型" class="headerlink" title="Nginx 事件模型"></a>Nginx 事件模型</h1><p>worker 进程只有一个主线程，并不代表它只可以并发的处理一个请求。原因在与 Nginx 的 worker 进程采用<strong>异步非阻塞</strong>的方式来处理请求，也就是说，nginx 是可以同时处理成千上万个请求的。一个 worker 进程可以同时处理的请求数只受限于内存大小。<a href="http://ilingling.cc/2016/05/13/I-O-Models/" target="_blank" rel="external">关于IO模型</a></p>
+<h1 id="Nginx-高并发性"><a href="#Nginx-高并发性" class="headerlink" title="Nginx 高并发性"></a>Nginx 高并发性</h1><p>不同与 Apache 的每个请求占用一个工作线程，当并发数上到几千时，就同时有几千的线程在处理请求，而线程带来的内存占用非常大，线程的上下文切换也会带来很大的 cpu 开销，自然性能就上不去。Nginx 的高并发性取决于 Nginx 的进程模型和事件模型。<br><strong><br>1.Nginx 采用多进程<br>2.Nginx 采用异步非阻塞方式处理请求
+</strong></p>
+<h2 id="多进程"><a href="#多进程" class="headerlink" title="多进程"></a>多进程</h2><p>多进程的好处：首先，对于每个 worker 进程来说，独立的进程，不需要加锁，所以省掉了锁带来的开销，同时在编程以及问题查找时，也会方便很多。其次，采用独立的进程，可以让互相之间不会影响，一个进程退出后，其它进程还在工作，服务不会中断，master 进程则很快启动新的 worker 进程。当然，worker 进程的异常退出，肯定是程序有 bug 了，异常退出，会导致当前 worker 上的所有请求失败，不过不会影响到所有请求，所以降低了风险。</p>
+<h2 id="异步非阻塞方式"><a href="#异步非阻塞方式" class="headerlink" title="异步非阻塞方式"></a>异步非阻塞方式</h2><p>Nginx 的 worker 进程采用<strong>异步非阻塞</strong>的方式来处理请求。对 Nginx 来说，每进来一个 request，就会有一个 worker 进程去处理。但不是一次性对这个 request 进行全程的处理，而是处理到这个 request 需要等待的地方，比如向上游（后端）服务器转发 request，并等待请求返回。而这时，处理这个 request 的 worker 不会这么傻等着而是在发送完请求后，注册一个事件：“如果 upstream 返回了，告诉我一声，我再接着干”（异步）。这时候他就又有能力区处理其他的 request（非阻塞，不会等待网络 IO 就绪，worker 进程<strong>不会进入睡眠状态</strong>），而不是阻塞。如果再有 request 进来，它就可以很快再按这种方式处理。而一旦上游服务器返回了，就会触发注册的事件，worker 就回来对这个 request 继续进行处理。可以看到，虽然一个 worker 同一时刻只能处理一个 request ，但是，对于一个 worker 所承担的所有 request ， worker 是轮流进行处理的，不断的对可进一步处理的 request 进行切换， 而且切换也是因为异步事件未准备好，而主动让出的，这里的切换是没有任何代价，可以理解为循环处理多个准备好的事件。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="http://tengine.taobao.org/book/chapter_02.html" target="_blank" rel="external">http://tengine.taobao.org/book/chapter_02.html</a><br><a href="https://www.zhihu.com/question/22062795/answer/20197329" target="_blank" rel="external">https://www.zhihu.com/question/22062795/answer/20197329</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Nginx的高并发性取决于它的进程模型和事件模型，最主要的原因是 Nginx worker 进程异步非阻塞的处理方式。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="Linux" scheme="https://github.com/Sword2G/sword2g.github.io/categories/Linux/"/>
+    
+    
+      <category term="Nginx" scheme="https://github.com/Sword2G/sword2g.github.io/tags/Nginx/"/>
+    
+  </entry>
   
   <entry>
     <title>Nginx安装Modsecurity</title>
@@ -943,10 +975,10 @@ local17.debug /var/log/cisco.log
     <link href="https://github.com/Sword2G/sword2g.github.io/2016/05/13/select-poll-epoll/"/>
     <id>https://github.com/Sword2G/sword2g.github.io/2016/05/13/select-poll-epoll/</id>
     <published>2016-05-13T01:18:20.000Z</published>
-    <updated>2017-03-03T12:54:39.660Z</updated>
+    <updated>2017-03-15T06:56:38.246Z</updated>
     
     <content type="html"><![CDATA[<p>select, poll, epoll都是IO多路复用的机制，它允许进程指示内核等待多个事件中的任何一个发生，并且在只有一个或者多个事件发生或经历一段指定的时间后才唤醒它。<br><a id="more"></a></p>
-<h1 id="select-函数"><a href="#select-函数" class="headerlink" title="select 函数"></a>select 函数</h1><h2 id="原型"><a href="#原型" class="headerlink" title="原型"></a>原型</h2><figure class="highlight autoit"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">\<span class="meta">#<span class="meta-keyword">include</span>&amp;lt;sys/types.h&amp;gt;</span></div><div class="line">\<span class="meta">#<span class="meta-keyword">include</span>&amp;lt;sys/times.h&amp;gt;</span></div><div class="line">\<span class="meta">#<span class="meta-keyword">include</span>&amp;lt;sys/select.h&amp;gt;</span></div><div class="line"></div><div class="line"><span class="built_in">int</span> <span class="keyword">select</span>(</div><div class="line"><span class="built_in">int</span> maxfdp1,</div><div class="line">fd_set* readfds,</div><div class="line">fd_set* writefds,</div><div class="line">fd_set* exceptfds,</div><div class="line"><span class="keyword">const</span> struct timeval* timeout</div><div class="line">)<span class="comment">;</span></div></pre></td></tr></table></figure>
+<h1 id="select-函数"><a href="#select-函数" class="headerlink" title="select 函数"></a>select 函数</h1><h2 id="原型"><a href="#原型" class="headerlink" title="原型"></a>原型</h2><figure class="highlight autoit"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> sys/types.h;</span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> sys/times.h;</span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> sys/select.h;</span></div><div class="line"></div><div class="line"><span class="built_in">int</span> <span class="keyword">select</span>(</div><div class="line"><span class="built_in">int</span> maxfdp1,</div><div class="line">fd_set* readfds,</div><div class="line">fd_set* writefds,</div><div class="line">fd_set* exceptfds,</div><div class="line"><span class="keyword">const</span> struct timeval* timeout</div><div class="line">)<span class="comment">;</span></div></pre></td></tr></table></figure>
 <h2 id="参数解释"><a href="#参数解释" class="headerlink" title="参数解释"></a>参数解释</h2><ul>
 <li>maxfdp1 是一个整数值，是指集合中所有文件描述符的范围，即所有文件描述符的最大值加1</li>
 <li>readfds 要求内核测试的读描述符集</li>
@@ -1019,12 +1051,25 @@ local17.debug /var/log/cisco.log
 <ul>
 <li><p>LT模式：当epoll_wait检测到描述符事件发生并将此事件通知应用程序，应用程序可以不立即处理该事件。下次调用epoll_wait时，会再次响应应用程序并通知此事件。</p>
 </li>
-<li><p>ET模式：当epoll_wait检测到描述符事件发生并将此事件通知应用程序，应用程序必须立即处理该事件。如果不处理，下次调用epoll_wait时，不会再次响应应用程序并通知此事件。</p>
+<li><p>ET模式：当epoll_wait 检测到描述符事件发生并将此事件通知应用程序，应用程序必须立即处理该事件。如果不处理，下次调用 epoll_wait 时，不会再次响应应用程序并通知此事件。</p>
 </li>
 </ul>
-<p>ET模式在很大程度上减少了epoll事件被重复触发的次数，因此效率要比LT模式高。epoll工作在ET模式的时候，必须使用非阻塞套接口，以避免由于一个文件句柄的阻塞读/阻塞写操作把处理多个文件描述符的任务饿死。</p>
-<h1 id="select-poll-epoll区别"><a href="#select-poll-epoll区别" class="headerlink" title="select poll epoll区别"></a>select poll epoll区别</h1><p>1 select，poll实现需要自己不断轮询所有fd集合，直到设备就绪，期间可能要睡眠和唤醒多次交替。而epoll其实也需要调用epoll_wait不断轮询就绪链表，期间也可能多次睡眠和唤醒交替，但是它是设备就绪时，调用回调函数，把就绪fd放入就绪链表中，并唤醒在epoll_wait中进入睡眠的进程。虽然都要睡眠和交替，但是select和poll在“醒着”的时候要遍历整个fd集合，而epoll在“醒着”的时候只要判断一下就绪链表是否为空就行了，这节省了大量的CPU时间。这就是回调机制带来的性能提升。</p>
-<p>2 select，poll每次调用都要把fd集合从用户态往内核态拷贝一次，并且要把current往设备等待队列中挂一次，而epoll只要一次拷贝，而且把current往等待队列上挂也只挂一次（在epoll_wait的开始，注意这里的等待队列并不是设备等待队列，只是一个epoll内部定义的等待队列）。这也能节省不少的开销。</p>
+<p>ET 模式在很大程度上减少了 epoll 事件被重复触发的次数，因此效率要比 LT 模式高。epoll 工作在ET模式的时候，必须使用非阻塞套接口，以避免由于一个文件句柄的阻塞读/阻塞写操作把处理多个文件描述符的任务饿死。</p>
+<h1 id="select-poll-epoll-区别"><a href="#select-poll-epoll-区别" class="headerlink" title="select poll epoll 区别"></a>select poll epoll 区别</h1><p>1 进程所能打开的最大连接数</p>
+<ul>
+<li>单个进程所能打开的最大连接数有 FD_SETSIZE 宏定义，其大小是 32 个整数的大小（在 32 位的机器上，大小就是 32<em>32，同理 64 位机器上 FD_SETSIZE 为 32</em>64），可以通过重新编译内核修改。poll 本质上和 select 没有区别，但是它没有最大连接数的限制，原因是它是基于链表来存储的。</li>
+<li>虽然连接数有上限，但是很大，1G 内存的机器上可以打开 10 万左右的连接，2G 内存的机器可以打开 20 万左右的连接</li>
+</ul>
+<p>2 FD剧增后带来的 I O效率问题</p>
+<ul>
+<li>select、poll 每次调用时都会对连接进行线性遍历，所以随着 fd 的增加会造成遍历速度慢的“线性下降性能问题”。</li>
+<li>使用“事件”通知方式，每当 fd 就绪，系统注册的回调函数就会被调用，将就绪 fd 放到 rdllist 里面，这样 epoll_wait 返回的时候我们就拿到了就绪的 fd</li>
+</ul>
+<p>3 fd 的拷贝</p>
+<ul>
+<li>select，poll 每次调用都要把fd集合从用户态往内核态拷贝一次</li>
+<li>调用 epoll_ctl 时拷贝进内核并由内核保存，之后每次 epoll_wait 不拷贝</li>
+</ul>
 <h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a href="http://www.cnblogs.com/Anker/archive/2013/08/17/3263780.html" target="_blank" rel="external">http://www.cnblogs.com/Anker/archive/2013/08/17/3263780.html</a><br><a href="http://www.cnblogs.com/Anker/p/3265058.html" target="_blank" rel="external">http://www.cnblogs.com/Anker/p/3265058.html</a></p>
 ]]></content>
     
@@ -1046,7 +1091,7 @@ local17.debug /var/log/cisco.log
     <link href="https://github.com/Sword2G/sword2g.github.io/2016/05/13/I-O-Models/"/>
     <id>https://github.com/Sword2G/sword2g.github.io/2016/05/13/I-O-Models/</id>
     <published>2016-05-12T23:13:24.000Z</published>
-    <updated>2017-03-03T13:32:50.478Z</updated>
+    <updated>2017-03-15T06:36:47.569Z</updated>
     
     <content type="html"><![CDATA[<p>Unix下可用的 I/O 模型有五种：<a href="#阻塞式-I-O-模型">阻塞式 I/O 模型</a>、<a href="#非阻塞式-I-O-模型">非阻塞式 I/O 模型</a>、<a href="#I-O-复用模型">I/O 复用模型</a>、<a href="#信号驱动式-I-O（SIGIO）模型">信号驱动式 I/O模型（SIGIO）</a>、<a href="#异步-I-O-模型">异步 I/O 模型（POSIX 的 aio_ 系列函数）</a>。<br><a id="more"></a></p>
 <h1 id="输入系统"><a href="#输入系统" class="headerlink" title="输入系统"></a>输入系统</h1><h2 id="普通输入操作"><a href="#普通输入操作" class="headerlink" title="普通输入操作"></a>普通输入操作</h2><p>一个输入操作一般分为两个阶段：<br>1 等待数据可读；<br>2 将数据从内核复制到进程。</p>
@@ -1059,6 +1104,17 @@ local17.debug /var/log/cisco.log
 <ul>
 <li>同步 ：就是在发出一个功能调用时，在没有得到结果之前，该调用就不返回。也就是必须一件一件事做,等前一件做完了才能做下一件事。</li>
 <li>异步 ：异步的概念和同步相对。当一个异步过程调用发出后，调用者不能立刻得到结果。实际处理这个调用的部件在完成后，通过状态、通知和回调来通知调用者。</li>
+</ul>
+<h2 id="阻塞与非阻塞"><a href="#阻塞与非阻塞" class="headerlink" title="阻塞与非阻塞"></a>阻塞与非阻塞</h2><ul>
+<li>阻塞 ： 指调用结果返回之前，当前进程会被挂起，函数只有在得到结果之后才会返回。</li>
+<li>非阻塞 ：指在不能立刻得到结果之前，该函数不会阻塞当前线程(不会挂起线程)，而会立刻返回（错误）。</li>
+</ul>
+<h2 id="同步异步-amp-阻塞非阻塞"><a href="#同步异步-amp-阻塞非阻塞" class="headerlink" title="同步异步&amp;阻塞非阻塞"></a>同步异步&amp;阻塞非阻塞</h2><ul>
+<li><p>同步和阻塞 ：同步线程还是激活的，只是从逻辑上当前函数没有返回而已。阻塞会挂起线程。</p>
+</li>
+<li><p>同步IO和异步IO的区别就在于：数据访问的时候进程是否阻塞！关注的是消息通信机制！</p>
+</li>
+<li>阻塞IO和非阻塞IO的区别就在于：应用程序的调用是否立即返回！关注的是程序在等待调用结果（消息，返回值）时的状态！</li>
 </ul>
 <h3 id="POSIX同步-I-O"><a href="#POSIX同步-I-O" class="headerlink" title="POSIX同步 I/O"></a>POSIX同步 I/O</h3><h4 id="阻塞式-I-O-模型"><a href="#阻塞式-I-O-模型" class="headerlink" title="阻塞式 I/O 模型"></a>阻塞式 I/O 模型</h4><p>最常用的一个模型是同步阻塞 I/O 模型。在这个模型中，用户空间的应用程序执行一个系统调用，这会导致应用程序阻塞。这意味着应用程序会一直阻塞，直到系统调用完成为止（数据传输完成或发生错误）。调用应用程序处于一种不再消费 CPU 而只是简单等待响应的状态，因此从处理的角度来看，这是非常有效的。<br>一个传统的阻塞 I/O 模型如下：<br><img src="http://7xum8m.com1.z0.glb.clouddn.com/hexo_iomodels_traditional_block_io.jpg.gif" alt="传统阻塞I/O模型典型流程"></p>
 <p>在调用 read 系统调用时，应用程序会阻塞并对内核进行上下文切换。然后会触发读操作，当响应返回时（从我们正在从中读取的设备中返回），数据就被移动到用户空间的缓冲区中。然后应用程序就会解除阻塞（read 调用返回）。</p>
@@ -1074,7 +1130,7 @@ local17.debug /var/log/cisco.log
 <h3 id="POSIX-异步-I-O"><a href="#POSIX-异步-I-O" class="headerlink" title="POSIX 异步 I/O"></a>POSIX 异步 I/O</h3><h4 id="异步-I-O-模型"><a href="#异步-I-O-模型" class="headerlink" title="异步 I/O 模型"></a>异步 I/O 模型</h4><p>告知内核启动某个动作，并在动作完成后告知我们。</p>
 <p><img src="http://7xum8m.com1.z0.glb.clouddn.com/hexo_iomodels_asy.jpg" alt="数据报套接字异步 I/O 模型的典型流程"></p>
 <h2 id="五种-I-O-模型的比较"><a href="#五种-I-O-模型的比较" class="headerlink" title="五种 I/O 模型的比较"></a>五种 I/O 模型的比较</h2><p><img src="http://7xum8m.com1.z0.glb.clouddn.com/hexo_iomodels_compare.jpg" alt="五种 I/O 模型的比较"></p>
-<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a href="http://www.ibm.com/developerworks/cn/linux/l-async/#authorN10019" target="_blank" rel="external">http://www.ibm.com/developerworks/cn/linux/l-async/#authorN10019</a><br><a href="http://www.cnblogs.com/renxs/p/3683189.html" target="_blank" rel="external">http://www.cnblogs.com/renxs/p/3683189.html</a><br><a href="http://blog.jobbole.com/53152/" target="_blank" rel="external">http://blog.jobbole.com/53152/</a><br><a href="https://book.douban.com/subject/4859464/" target="_blank" rel="external">https://book.douban.com/subject/4859464/</a></p>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a href="http://www.ibm.com/developerworks/cn/linux/l-async/#authorN10019" target="_blank" rel="external">http://www.ibm.com/developerworks/cn/linux/l-async/#authorN10019</a><br><a href="http://blog.csdn.net/hguisu/article/details/7453390" target="_blank" rel="external">http://blog.csdn.net/hguisu/article/details/7453390</a><br><a href="http://www.cnblogs.com/renxs/p/3683189.html" target="_blank" rel="external">http://www.cnblogs.com/renxs/p/3683189.html</a><br><a href="http://blog.jobbole.com/53152/" target="_blank" rel="external">http://blog.jobbole.com/53152/</a><br><a href="https://book.douban.com/subject/4859464/" target="_blank" rel="external">https://book.douban.com/subject/4859464/</a></p>
 ]]></content>
     
     <summary type="html">
@@ -1518,71 +1574,6 @@ local17.debug /var/log/cisco.log
     
     
       <category term="ff extension, js" scheme="https://github.com/Sword2G/sword2g.github.io/tags/ff-extension-js/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>POP3协议</title>
-    <link href="https://github.com/Sword2G/sword2g.github.io/2016/03/19/POP3_protocol/"/>
-    <id>https://github.com/Sword2G/sword2g.github.io/2016/03/19/POP3_protocol/</id>
-    <published>2016-03-19T02:09:20.000Z</published>
-    <updated>2016-03-21T15:22:17.375Z</updated>
-    
-    <content type="html"><![CDATA[<p>POP3，全名为“Post Office Protocol - Version 3”，即“邮局协议版本3”。主要用于客户端进行邮件的收取。<br><a id="more"></a></p>
-<h1 id="POP3简介"><a href="#POP3简介" class="headerlink" title="POP3简介"></a>POP3简介</h1><p>POP3，全名为“Post Office Protocol - Version 3”，即“邮局协议版本3”。主要用于客户端进行邮件的收取。</p>
-<h1 id="POP3状态"><a href="#POP3状态" class="headerlink" title="POP3状态"></a>POP3状态</h1><p>在整个生命周期中，POP3会话有几个不同的状态。<br>一旦TCP连接被打开，而且POP3服务器发送了确认信息，此过程就进入了“确认”状态。在此状态中，客户必须向POP3服务器确认自己是其的客户。一旦确认成功，服务器就获取与客户邮件相关的资源，此时这一过程进入了“操作”状态。在此状态中，客户提出服务，当客户发出QUIT命令时，此过程进入了“更新”状态。在此状态中，POP3服务器释放在“操作”状态中取得的资源，并发送消息，终止连接。</p>
-<h1 id="POP3命令"><a href="#POP3命令" class="headerlink" title="POP3命令"></a>POP3命令</h1><p>POP3命令由一个命令和一些参数组成，都以一个CRLF对结束。命令和参数都是由可打印的ASCII字符组成，它们之间由空格间隔。</p>
-<h1 id="POP3响应"><a href="#POP3响应" class="headerlink" title="POP3响应"></a>POP3响应</h1><p>POP3响应由一个状态码和一个可能跟有的附加信息组成。所有响应也是由CRLF对结束。现在有两种状态码，“确定”(“+OK”)和“失败”(“-ERR”)。</p>
-<blockquote>
-<p>对于特定命令的响应是由许多字符组成的，在发送第一行响应和一个CRLF之后，任何的附加信息行发送，他们也由CRLF对结束。当所有信息发送结束时，发送最后一行，包括一个结束字符（十进制码46，也就是“.”）和一个CRLF对。如果信息中的任何一行以结束字符开始，此行就是通过在那一行预先装入结束而进行字符填充的。<br>当检测多行响应时，客户检测以确认此行是否以结束字符开始。如果是的，而且其后的字符不是CRLF，此行的第一个字符（结束字符）将被抛弃；如果其后紧跟CRLF，从POP服务器来的响应终止，包括.CRLF的行也不被认为是多行响应的一部分了。</p>
-</blockquote>
-<h1 id="POP3建立连接的流程及状态变化"><a href="#POP3建立连接的流程及状态变化" class="headerlink" title="POP3建立连接的流程及状态变化"></a>POP3建立连接的流程及状态变化</h1><p>初始时，服务器通过侦听TCP端口110开始POP3服务,客户端首先与POP3服务器建立TCP连接，建立连接后，POP3服务器发送一个单行的确认。这个消息可以是由CRLF结束的任何字符。例如，它可以是：<code>server:+OKPOP3serverready</code></p>
-<h3 id="确认状态"><a href="#确认状态" class="headerlink" title="确认状态"></a>确认状态</h3><p>此时POP3会话就进入了“确认”状态，客户必须向服务器证明它的身份。<br>有两种方式向服务器证明身份：</p>
-<ol>
-<li>USER和PASS命令；</li>
-<li>APOP命令</li>
-</ol>
-<h4 id="通过USER和PASS命令确认"><a href="#通过USER和PASS命令确认" class="headerlink" title="通过USER和PASS命令确认"></a>通过USER和PASS命令确认</h4><p>用USER和PASS命令进行确认过程，客户必须首先发送USER命令，如果POP3服务器以“确认”状态码响应，客户就可以发送PASS命令以完成确认<br>步骤如下：<br>1 发送用户名。<br>    语法形式：USER &lt;用户名&gt;<br>    功能：将客户的用户名发送到服务器。<br>    服务器返回：+OK正确的用户名；-ERR错误的用户名。<br>    示例：<br>    client：USER myname@163.com<br>    server：+OK welcome on this server.<br>    上述两行代码的含义为：客户端发送“USER <em>myname</em>@163.com”，服务器端回送信息“+OK welcome on this server.”。</p>
-<p>2 用户名确认成功后，需要输入密码。（PASS <em>string</em>口令仅在“确认”状态中USER命令成功后使用）<br>    语法形式：PASS &lt;密码&gt;<br>    功能：将客户的密码发送给服务器。<br>    一旦服务器通过这些数据决定允许客户访问储存邮件，服务器会在邮件上加上排它锁，以防止在进入“更新”状态前对邮件的改变。如果成功获得了排它锁，服务器返回一个“确认”状态码。会话进入“操作状态”。<br>    服务器返回：+OK正确的用户名；-ERR错误的用户名。<br>    示例：<br>    client：PASS <strong>*</strong><br>    server：+OK <em>myname</em> logged in at 9:40<br>授权成功后，进入操作状态。</p>
-<h3 id="操作状态"><a href="#操作状态" class="headerlink" title="操作状态"></a>操作状态</h3><p>一旦客户向服务器成功地确认了自己的身份，服务器将锁住并打开相应的邮件，这时POP3会话进入“操作”状态。现在客户可以重复下面的POP3命令，对于每个命令服务器都会返回应答。</p>
-<p>1 STAT命令<br>    语法形式：STAT<br>    功能：从服务器中获取邮件总数和总字节数。仅在“操作”状态下可用。被标记为删除的信件不在此列<br>    服务器返回：邮件总数和总字节数。<br>    服务器以包括邮件信息的响应做为“确认”。为简化语法分析，所有的服务器要求使用邮件列表的特定格式。响应由一个空格，以八进制表示的邮件数目，一个空格和邮件大小<br>    示例：<br>    client：STAT<br>    server：+OK 2 320<br>2 LIST命令<br>    语法形式：LIST<br>    功能：从服务中获得邮件列表和大小。仅在“操作”状态下可用。<br>    如果给出了参数，且POP3服务器返回包括上述信息的“确认”，此行称为信息的“扫描表”。<br>    如果没有参数，服务器返回“确认”响应，此响应便以多行给出(注意：被标记为删除的信件不在此列)<br>    服务器返回：列出邮件列表和大小。<br>    +OK：其后跟扫描表；<br>    -ERR：无扫描。</p>
-<pre><code>示例：
-client: LIST
-server：+OK 2 messages (320 octets)
-server：1  120
-server：2  200
-server： .
-
-client:LIST 2(邮件的序号)
-
-server:+OK 2 200
-
-client:LIST 3
-server：-ERR no such message,only 2 messages in mail drop
-</code></pre><p>3 RETR命令<br>    语法形式：RETR  &lt;邮件的序号&gt;<br>    功能：从服务器中获得一个邮件。不包括标记为删除的信件数目<br>    服务器返回：<br>      OK：消息在其后；<br>            -ERR：其后无消息。。<br>        对于多行响应，注意字节填充终止符.<br>    示例：<br>    client：RETR 1<br>    server：+OK 120 octets<br>    server：&lt;服务器发送信件1内容&gt;<br>    server： .<br>    注意，这里的“.”是单独发送的。</p>
-<p>4 DELE命令<br>    语法形式：DELE &lt;邮件的序号&gt;<br>    功能：服务器将邮件标记为删除，当执行QUIT命令时才真正删除。(可以通过RSET 命令进行撤消删除 )<br>    服务器将此信件标记为删除，以后任何关于此信件的操作就会产生错误。服务器在会话进入“更新”状态(quit)前不会真正删除此信件<br>    服务器返回：<br>    +OK：信件被删除；<br>    -ERR：无此信件。<br>    示例：<br>    client：DELE 1<br>    server：+OK 1 Deleted<br>    当客户发送QUIT命令时，会话进”入更新”状态。<br>    client:DELE 1<br>    server:+OK message 1 deleted<br>    client:DELE 2<br>    server:-ERR message 2 already deleted<br>5 NOOP（无）<br>仅在“操作”状态下可用。服务器仅返回“确认”。<br>  示例：<br>  clinet: NOOP<br>  server: +OK</p>
-<p>6 RSET（无）<br>仅在“操作”状态下可用。所有被标记为删除的信件复位，服务器返回“确认”。<br>client: RSET<br>server: +OK maildrop has 2 messages(320个字符)</p>
-<p>7 TOP命令<br> 语法形式：DELE &lt;邮件的序号&gt;<br>    功能：显示邮件头的信息，从中找出邮件作者有主题。你甚至可以只下载这部分信息<br>    服务器返回：<br>    +OK：其后有信件头；<br>    -ERR：其后无类似消息。<br>    如果服务器返回“确认”，响应是多行的。在初始的+OK后，服务器发送信件头，一个空行将信件头和信件体分开，对于多行响应要注意字节填充终止符。(注意：如果客户要求的行数比信件体中的行数大，服务器会发送整个信件)</p>
-<pre><code>示例：
-client:TOP 1 10
-server：+OK
-server:&lt;服务器发送消息头，一个空行和信件的头10行&gt;
-server:.
-</code></pre><h3 id="更新状态"><a href="#更新状态" class="headerlink" title="更新状态"></a>更新状态</h3><p>当客户在操作状态下发送QUIT命令后，会话进入更新状态。<br>QUIT命令<br>    语法形式：QUIT<br>    功能：服务器删除所有标记为删除的信件，然后释放排它锁，并返回这些操作的状态码。最后TCP连接被中断。<br>    服务器返回：<br>    +OK<br>    -ERR<br>    示例：<br>    client：QUIT<br>          server：+OK<br>    然后服务器自动断开与该客户端的TCP连接。</p>
-<p>以上讨论的命令是对POP3服务的最小实现。<br>（完）</p>
-<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><p><a href="http://www.cnblogs.com/fujinliang/archive/2012/06/30/2570764.html" target="_blank" rel="external">http://www.cnblogs.com/fujinliang/archive/2012/06/30/2570764.html</a><br><a href="http://www.cnpaf.net/Class/POP3/200408/117.html" target="_blank" rel="external">http://www.cnpaf.net/Class/POP3/200408/117.html</a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;POP3，全名为“Post Office Protocol - Version 3”，即“邮局协议版本3”。主要用于客户端进行邮件的收取。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="网络协议" scheme="https://github.com/Sword2G/sword2g.github.io/categories/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/"/>
-    
-    
-      <category term="protocol" scheme="https://github.com/Sword2G/sword2g.github.io/tags/protocol/"/>
     
   </entry>
   
