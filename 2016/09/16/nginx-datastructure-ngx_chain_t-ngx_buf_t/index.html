@@ -1,0 +1,843 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Nginx," />
+
+
+
+
+
+  <link rel="alternate" href="http://sword2g.github.io/atom.xml" title="No root,no fruit" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="Nginx模块基础数据结构————ngx_chain_t、ngx_buf_t。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nginx 基础数据结构(二)">
+<meta property="og:url" content="https://github.com/Sword2G/sword2g.github.io/2016/09/16/nginx-datastructure-ngx_chain_t-ngx_buf_t/index.html">
+<meta property="og:site_name" content="No root,no fruit">
+<meta property="og:description" content="Nginx模块基础数据结构————ngx_chain_t、ngx_buf_t。">
+<meta property="og:updated_time" content="2017-03-25T16:04:33.413Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Nginx 基础数据结构(二)">
+<meta name="twitter:description" content="Nginx模块基础数据结构————ngx_chain_t、ngx_buf_t。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/Sword2G/sword2g.github.io/2016/09/16/nginx-datastructure-ngx_chain_t-ngx_buf_t/"/>
+
+
+
+
+
+  <title> Nginx 基础数据结构(二) | No root,no fruit </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">No root,no fruit</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">just do it！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/resume.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://github.com/Sword2G/sword2g.github.io/2016/09/16/nginx-datastructure-ngx_chain_t-ngx_buf_t/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sword2g">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="No root,no fruit">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Nginx 基础数据结构(二)
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-09-16T15:45:25+08:00">
+                2016-09-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/09/16/nginx-datastructure-ngx_chain_t-ngx_buf_t/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/09/16/nginx-datastructure-ngx_chain_t-ngx_buf_t/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Nginx模块基础数据结构————ngx_chain_t、ngx_buf_t。<br><a id="more"></a></p>
+<h1 id="ngx-chain-t"><a href="#ngx-chain-t" class="headerlink" title="ngx_chain_t"></a>ngx_chain_t</h1><p>nginx中很多的数据都需要通过ngx_chain_t结构进行保存。 如 nginx 的filter模块在处理从别的filter模块或者是handler模块传递过来的数据（实际上就是需要发送给客户端的http response）。这个传递过来的数据是以一个链表的形式(ngx_chain_t)。而且数据可能被分多次传递过来。也就是多次调用filter的处理函数，以不同的ngx_chain_t。ngx_chain_t 是 ngx_chain_t的节点。</p>
+<h2 id="ngx-chain-t定义"><a href="#ngx-chain-t定义" class="headerlink" title="ngx_chain_t定义"></a>ngx_chain_t定义</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> ngx_chain_s       <span class="keyword">ngx_chain_t</span>;</div><div class="line"></div><div class="line"><span class="keyword">struct</span> ngx_chain_s &#123;</div><div class="line">	<span class="comment">// buf指向当前的ngx_buf_t缓冲区(实际的数据)</span></div><div class="line">    <span class="keyword">ngx_buf_t</span>    *buf;</div><div class="line">    <span class="comment">// next指向这个链表的下个节点</span></div><div class="line">    <span class="keyword">ngx_chain_t</span>  *next;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h2 id="ngx-chain-t-api"><a href="#ngx-chain-t-api" class="headerlink" title="ngx_chain_t api"></a>ngx_chain_t api</h2><figure class="highlight xl"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//该函数创建一个ngx_chain_t的对象，并返回指向对象的指针，失败返回NULL。</span></div><div class="line">ngx_chain_t *ngx_alloc_chain_link(ngx_pool_t *pool);</div><div class="line"></div><div class="line"><span class="comment">//该宏释放一个ngx_chain_t类型的对象。如果要释放整个chain，则迭代此链表，对每个节点使用此宏即可。</span></div><div class="line">#define ngx_free_chain(pool, cl)                                             \</div><div class="line">    <span class="function"><span class="title">cl</span>-&gt;</span><span class="function"><span class="title">next</span> = pool-&gt;</span>chain;                                                  \</div><div class="line"><span class="function"><span class="title">pool</span>-&gt;</span>chain = cl</div></pre></td></tr></table></figure>
+<p><strong><br>注意: 对ngx_chaint_t类型的释放，并不是真的释放了内存，而仅仅是把这个对象挂在了这个pool对象的一个叫做chain的字段对应的chain上，以供下次从这个pool上分配ngx_chain_t类型对象的时候，快速的从这个pool-&gt;chain上取下链首元素就返回了，当然，如果这个链是空的，才会真的在这个pool上使用ngx_palloc函数进行分配。
+</strong></p>
+<h1 id="ngx-buf-t"><a href="#ngx-buf-t" class="headerlink" title="ngx_buf_t"></a>ngx_buf_t</h1><p>ngx_buf_t就是这个ngx_chain_t链表的每个节点的实际数据。该结构实际上是一种抽象的数据结构，它代表某种具体的数据。这个数据可能是指向内存中的某个缓冲区，也可能指向一个文件的某一部分，也可能是一些纯元数据（元数据的作用在于指示这个链表的读取者对读取的数据进行不同的处理）。</p>
+<h2 id="ngx-buf-t定义"><a href="#ngx-buf-t定义" class="headerlink" title="ngx_buf_t定义"></a>ngx_buf_t定义</h2><figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line">typedef struct ngx_buf_s         ngx_buf_t<span class="comment">;</span></div><div class="line">    </div><div class="line">struct ngx_buf_s &#123;</div><div class="line">    <span class="comment">/*当前读取buffer位置*/</span></div><div class="line">    u_char          *pos<span class="comment">; </span></div><div class="line">    <span class="comment">/*实际占用buffer的最后位置*/</span></div><div class="line">    u_char          *last<span class="comment">;</span></div><div class="line">    <span class="comment">/*当前读取文件位置*/</span></div><div class="line">    off_t            file_pos<span class="comment">;</span></div><div class="line">    <span class="comment">/*文件最后位置*/</span></div><div class="line">    off_t            file_last<span class="comment">;</span></div><div class="line">    </div><div class="line">    <span class="comment">/*buffer开始位置*/</span></div><div class="line">    u_char          *start<span class="comment">;</span></div><div class="line">    <span class="comment">/*buffer结束位置*/</span>  </div><div class="line">    u_char          *end<span class="comment">;</span></div><div class="line">    <span class="comment">/*内存标记,实际上是一个void*类型的指针，使用者可以关联任意的对象上去，只要对使用者有意义。*/</span></div><div class="line">    ngx_buf_tag_t    tag<span class="comment">;</span></div><div class="line">    <span class="comment">/*当buf所包含的内容在文件中时，file字段指向对应的文件对象*/</span></div><div class="line">    ngx_file_t      *file<span class="comment">;</span></div><div class="line">    <span class="comment">/*</span></div><div class="line">    当这个buf完整copy了另外一个buf的所有字段的时候，那么这两个buf指向的实际上是同一块内存，或者是同一个文件的同一部分，此时这两个buf的shadow字段都是指向对方的。那么对于这样的两个buf，在释放的时候，就需要使用者特别小心，具体是由哪里释放，要提前考虑好，如果造成资源的多次释放，可能会造成程序崩溃！</div><div class="line">    */</div><div class="line">    ngx_buf_t       *<span class="keyword">shadow;</span></div><div class="line">    </div><div class="line">    <span class="comment">/*1表示内存可以修改,表示该buf所包含的内容是在一个用户创建的内存块中，并且可以被在filter处理的过程中进行变更，而不会造成问题*/</span></div><div class="line">    unsigned         temporary:<span class="number">1</span><span class="comment">;</span></div><div class="line">    <span class="comment">/*1表示该buf所包含的内容是在内存中，但是这些内容却不能被进行处理的filter进行变更*/</span></div><div class="line">    unsigned         memory:<span class="number">1</span><span class="comment">;</span></div><div class="line"></div><div class="line">    <span class="comment">/*1表示操作内容通过mmap()函数映射不可修改*/</span></div><div class="line">    unsigned         mmap:<span class="number">1</span><span class="comment">;</span></div><div class="line">    <span class="comment">/*1表示内存可以回收*/</span></div><div class="line">    unsigned         recycled:<span class="number">1</span><span class="comment">;</span></div><div class="line">    <span class="comment">/*1表示操作内容在文件中*/</span></div><div class="line">    unsigned         in_file:<span class="number">1</span><span class="comment">;</span></div><div class="line">    <span class="comment">/*1表示立即将内容发送出去*/</span></div><div class="line">    unsigned         flush:<span class="number">1</span><span class="comment">;</span></div><div class="line">    <span class="comment">/*1表示立即将内容同步发送出去*/</span></div><div class="line">    unsigned         <span class="keyword">sync:1;</span></div><div class="line">    <span class="comment">/*标记chain是否为最后一块buf*/</span></div><div class="line">    unsigned         last_buf:<span class="number">1</span><span class="comment">;</span></div><div class="line">    <span class="comment">/*标记chain中是否为最后一个chain，最后一块buf并不表示是最后一个chain，但最后一个chain一定是最后一块buf*/</span></div><div class="line">    unsigned         last_in_chain:<span class="number">1</span><span class="comment">;</span></div><div class="line">    <span class="comment">/* 标志位，在创建一个buf的shadow的时候，通常将新创建的一个buf的last_shadow置为1 */</span></div><div class="line">    unsigned         last_shadow:<span class="number">1</span><span class="comment">;</span></div><div class="line">    <span class="comment">/* 标志位，表示当前缓冲区是否属于临时文件,由于受到内存使用的限制，有时候一些buf的内容需要被写到磁盘上的临时文件中去 */</span></div><div class="line">    unsigned         temp_file:<span class="number">1</span><span class="comment">;</span></div><div class="line"></div><div class="line">    <span class="comment">/* STUB */</span> int   num<span class="comment">;</span></div><div class="line">&#125;<span class="comment">;</span></div></pre></td></tr></table></figure>
+<h2 id="ngx-buf-t-api"><a href="#ngx-buf-t-api" class="headerlink" title="ngx_buf_t api"></a>ngx_buf_t api</h2><figure class="highlight xl"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">ngx_buf_t *ngx_create_temp_buf(ngx_pool_t *pool, size_t size);</div><div class="line"><span class="comment">/*</span></div><div class="line">该函数创建一个ngx_but_t类型的对象，并返回指向这个对象的指针，创建失败返回NULL，temporary字段为1。</div><div class="line">对于创建的这个对象，它的start和end指向新分配内存开始和结束的地方。pos和last都指向这块新分配内存的开始处，这样，后续的操作可以在这块新分配的内存上存入数据。</div><div class="line">pool:	分配该buf和buf使用的内存所使用的pool。</div><div class="line">size:	该buf使用的内存的大小。</div><div class="line">为了配合对ngx_buf_t的使用，nginx定义了以下的宏方便操作。</div><div class="line">*/</div><div class="line"></div><div class="line">#<span class="function"><span class="title">define</span> ngx_buf_in_memory(b)        (b-&gt;</span><span class="function"><span class="title">temporary</span> || b-&gt;</span><span class="function"><span class="title">memory</span> || b-&gt;</span>mmap)</div><div class="line"><span class="comment">/*</span></div><div class="line">返回这个buf里面的内容是否在内存里。</div><div class="line">*/</div><div class="line">#<span class="function"><span class="title">define</span> ngx_buf_in_memory_only(b)   (ngx_buf_in_memory(b) &amp;&amp; !b-&gt;</span>in_file)</div><div class="line"><span class="comment">/*</span></div><div class="line">返回这个buf里面的内容是否仅仅在内存里，并且没有在文件里。</div><div class="line">*/</div><div class="line">#define ngx_buf_special(b)                                                   \</div><div class="line">    ((<span class="function"><span class="title">b</span>-&gt;</span><span class="function"><span class="title">flush</span> || b-&gt;</span><span class="function"><span class="title">last_buf</span> || b-&gt;</span>sync)                                    \</div><div class="line">     &amp;&amp; !<span class="function"><span class="title">ngx_buf_in_memory</span>(b) &amp;&amp; !b-&gt;</span>in_file)</div><div class="line"><span class="comment">/*</span></div><div class="line">返回该buf是否是一个特殊的buf，只含有特殊的标志和没有包含真正的数据。</div><div class="line">*/</div><div class="line">#define ngx_buf_sync_only(b)                                                 \</div><div class="line">    (<span class="function"><span class="title">b</span>-&gt;</span>sync                                                                 \</div><div class="line">     &amp;&amp; !<span class="function"><span class="title">ngx_buf_in_memory</span>(b) &amp;&amp; !b-&gt;</span><span class="function"><span class="title">in_file</span> &amp;&amp; !b-&gt;</span><span class="function"><span class="title">flush</span> &amp;&amp; !b-&gt;</span>last_buf)</div><div class="line"><span class="comment">/*</span></div><div class="line">返回该buf是否是一个只包含sync标志而不包含真正数据的特殊buf。</div><div class="line">*/</div><div class="line">#define ngx_buf_size(b)                                                      \</div><div class="line">    (<span class="function"><span class="title">ngx_buf_in_memory</span>(b) ? (off_t) (b-&gt;</span><span class="function"><span class="title">last</span> - b-&gt;</span>pos):                      \</div><div class="line">                            (<span class="function"><span class="title">b</span>-&gt;</span><span class="function"><span class="title">file_last</span> - b-&gt;</span>file_pos))</div><div class="line"><span class="comment">/*</span></div><div class="line">返回该buf所含数据的大小，不管这个数据是在文件里还是在内存里。</div><div class="line">*/</div></pre></td></tr></table></figure>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="http://tengine.taobao.org/book/chapter_02.html#ngx-chain-t-100" target="_blank" rel="external">http://tengine.taobao.org/book/chapter_02.html#ngx-chain-t-100</a><br><a href="http://www.cnblogs.com/ourroad/p/4838794.html" target="_blank" rel="external">http://www.cnblogs.com/ourroad/p/4838794.html</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_wechat_pay.jpg" alt="sword2g WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_ali_pay.jpg" alt="sword2g Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Nginx/" rel="tag"># Nginx</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/09/15/nginx-datastructure-ngx_str_t-ngx_pool_t/" rel="next" title="Nginx 基础数据结构(一)">
+                <i class="fa fa-chevron-left"></i> Nginx 基础数据结构(一)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/09/17/nginx-module-dev/" rel="prev" title="Nginx 模块开发————Hello XX">
+                Nginx 模块开发————Hello XX <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/09/16/nginx-datastructure-ngx_chain_t-ngx_buf_t/"
+           data-title="Nginx 基础数据结构(二)" data-url="https://github.com/Sword2G/sword2g.github.io/2016/09/16/nginx-datastructure-ngx_chain_t-ngx_buf_t/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg"
+               alt="sword2g" />
+          <p class="site-author-name" itemprop="name">sword2g</p>
+           
+              <p class="site-description motion-element" itemprop="description">put my notes here</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">30</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="http://sword2g.github.io/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/Sword2G" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/2816511392" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.douban.com/people/97199972/" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/birkhoff-lee" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://my.oschina.net/v5871314" title="梦回雪夜观花" target="_blank">梦回雪夜观花</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ngx-chain-t"><span class="nav-number">1.</span> <span class="nav-text">ngx_chain_t</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ngx-chain-t定义"><span class="nav-number">1.1.</span> <span class="nav-text">ngx_chain_t定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ngx-chain-t-api"><span class="nav-number">1.2.</span> <span class="nav-text">ngx_chain_t api</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ngx-buf-t"><span class="nav-number">2.</span> <span class="nav-text">ngx_buf_t</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ngx-buf-t定义"><span class="nav-number">2.1.</span> <span class="nav-text">ngx_buf_t定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ngx-buf-t-api"><span class="nav-number">2.2.</span> <span class="nav-text">ngx_buf_t api</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div align="center" class="powered-by">
+
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a> 
+  and Themed by -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist</a>
+
+
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sword2g</span>
+  
+</div>
+
+
+
+
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sword2g"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

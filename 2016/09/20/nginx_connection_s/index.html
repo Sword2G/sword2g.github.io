@@ -1,0 +1,843 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Nginx," />
+
+
+
+
+
+  <link rel="alternate" href="http://sword2g.github.io/atom.xml" title="No root,no fruit" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="Nginx 连接相关重要数据结构————ngx_connection_s  。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nginx 基础数据结构(四)">
+<meta property="og:url" content="https://github.com/Sword2G/sword2g.github.io/2016/09/20/nginx_connection_s/index.html">
+<meta property="og:site_name" content="No root,no fruit">
+<meta property="og:description" content="Nginx 连接相关重要数据结构————ngx_connection_s  。">
+<meta property="og:updated_time" content="2017-05-08T10:15:59.525Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Nginx 基础数据结构(四)">
+<meta name="twitter:description" content="Nginx 连接相关重要数据结构————ngx_connection_s  。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/Sword2G/sword2g.github.io/2016/09/20/nginx_connection_s/"/>
+
+
+
+
+
+  <title> Nginx 基础数据结构(四) | No root,no fruit </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">No root,no fruit</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">just do it！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/resume.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://github.com/Sword2G/sword2g.github.io/2016/09/20/nginx_connection_s/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sword2g">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="No root,no fruit">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Nginx 基础数据结构(四)
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-09-20T12:31:19+08:00">
+                2016-09-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/09/20/nginx_connection_s/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/09/20/nginx_connection_s/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Nginx 连接相关重要数据结构————ngx_connection_s  。<br><a id="more"></a></p>
+<h1 id="Nginx工作流程"><a href="#Nginx工作流程" class="headerlink" title="Nginx工作流程"></a>Nginx工作流程</h1><p>首先，nginx在启动时，会解析配置文件，得到需要监听的端口与ip地址，然后在nginx的master进程里面，先初始化好这个监控的socket(创建socket，设置addrreuse等选项，绑定到指定的ip地址端口，再listen)，然后再fork出多个子进程出来，然后子进程会竞争accept新的连接。此时，客户端就可以向nginx发起连接了。当客户端与服务端通过三次握手建立好一个连接后，nginx的某一个子进程会accept成功，得到这个建立好的连接的socket，然后创建nginx对连接的封装，即ngx_connection_t结构体。接着，设置读写事件处理函数并添加读写事件来与客户端进行数据的交换。最后，nginx或客户端来主动关掉连接，到此，一个连接就寿终正寝了，ngx_connection_t被释放。</p>
+<h1 id="ngx-connection-s-数据结构"><a href="#ngx-connection-s-数据结构" class="headerlink" title="ngx_connection_s 数据结构"></a>ngx_connection_s 数据结构</h1><p>在nginx中ngx_connection_s就是对tcp连接的封装，其中包括连接的socket(该socket的属性和数据信息)。利用nginx封装的ngx_connection_s，我们可以很方便的使用nginx来处理与连接相关的事情，比如，建立连接，发送与接受数据等。而nginx中的http请求的处理就是建立在ngx_connection_s之上的，所以nginx不仅可以作为一个web服务器，也可以作为邮件服务器。当然，利用nginx提供的ngx_connection_s，我们可以与任何后端服务打交道。</p>
+<p>ngx_connection_s的定义保存在/src/core/ngx_connection.h</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> ngx_connection_s &#123;</div><div class="line">    <span class="comment">// 用来关联其他的ngx_connection_s结构体</span></div><div class="line">    <span class="keyword">void</span>               *data;</div><div class="line">    <span class="comment">//连接的读事件  </span></div><div class="line">    <span class="keyword">ngx_event_t</span>        *read;</div><div class="line">    <span class="comment">//连接的写事件</span></div><div class="line">    <span class="keyword">ngx_event_t</span>        *write;</div><div class="line">    <span class="comment">//套接字对应的fd</span></div><div class="line">    <span class="keyword">ngx_socket_t</span>        fd;</div><div class="line"></div><div class="line">    <span class="comment">//指向完成数据接收函数的函数指针</span></div><div class="line">    ngx_recv_pt         recv;</div><div class="line">    ngx_send_pt         send;</div><div class="line"></div><div class="line">    <span class="comment">//指向完成批量数据接收函数的函数指针</span></div><div class="line">    ngx_recv_chain_pt   recv_chain;</div><div class="line">    ngx_send_chain_pt   send_chain;</div><div class="line"></div><div class="line">    <span class="comment">//该网络连接的socket监听（ngx_listening_s）结构体，ngx_listening_s结构体中的*connection成员又将指向该ngx_connection_s结构体</span></div><div class="line">    <span class="keyword">ngx_listening_t</span>    *listening;</div><div class="line">    <span class="comment">// 该连接已发送的数据</span></div><div class="line">    <span class="keyword">off_t</span>               sent;</div><div class="line">    <span class="comment">//日志对象 </span></div><div class="line">    <span class="keyword">ngx_log_t</span>          *<span class="built_in">log</span>;</div><div class="line">    *内存池。当accept一个新的连接时，会创建一个内存池，而在这个连接结束时会销毁内存池。内存池大小是由上面listening成员的pool_size决定的*/</div><div class="line">    <span class="keyword">ngx_pool_t</span>         *pool;</div><div class="line"></div><div class="line">    <span class="keyword">int</span>                 type;</div><div class="line">    <span class="comment">//连接客户端的sockaddr</span></div><div class="line">    <span class="keyword">struct</span> sockaddr    *sockaddr;</div><div class="line">    <span class="keyword">socklen_t</span>           socklen;</div><div class="line">    <span class="comment">//连接客户端字符串形式的IP</span></div><div class="line">    <span class="keyword">ngx_str_t</span>           addr_text;</div><div class="line">    <span class="comment">// 代理地址，用于http代理模块</span></div><div class="line">    <span class="keyword">ngx_str_t</span>           proxy_protocol_addr;</div><div class="line">    <span class="keyword">in_port_t</span>           proxy_protocol_port;</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> (NGX_SSL || NGX_COMPAT)</span></div><div class="line">    <span class="keyword">ngx_ssl_connection_t</span>  *ssl;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line">    <span class="comment">// 本地监听socket的地址结构。该信息来自ngx_listening_t结构体，最初来源于配置文件</span></div><div class="line">    <span class="keyword">struct</span> sockaddr    *local_sockaddr;</div><div class="line">    <span class="keyword">socklen_t</span>           local_socklen;</div><div class="line">    <span class="comment">//用户接受、缓存客户端发来的字符流，buffer是由连接内存池分配的，大小自由决定  </span></div><div class="line">    <span class="keyword">ngx_buf_t</span>          *buffer;</div><div class="line">    <span class="comment">/*用来将当前连接以双向链表元素的形式添加到ngx_cycle_t核心结构体的reuseable_connection_queue双向链表中，表示可以重用的连接*/</span>  </div><div class="line">    <span class="keyword">ngx_queue_t</span>         <span class="built_in">queue</span>;</div><div class="line">    <span class="comment">//连接使用次数。ngx_connection_t每建立一条来自client的连接或主动向server发起连接时，number都会加1</span></div><div class="line">    <span class="keyword">ngx_atomic_uint_t</span>   number;</div><div class="line">    <span class="comment">//处理的请求次数  </span></div><div class="line">    <span class="keyword">ngx_uint_t</span>          requests;</div><div class="line">    <span class="comment">//缓存中的业务类型，各个模块有自己的一些定义</span></div><div class="line">    <span class="keyword">unsigned</span>            buffered:<span class="number">8</span>;</div><div class="line">    <span class="comment">//本连接的日志级别，只定义了5个值，由ngx_connection_log_error_e枚举表示</span></div><div class="line">    <span class="keyword">unsigned</span>            log_error:<span class="number">3</span>;     <span class="comment">/* ngx_connection_log_error_e */</span></div><div class="line">    <span class="comment">// 1表示连接已超时</span></div><div class="line">    <span class="keyword">unsigned</span>            timedout:<span class="number">1</span>;</div><div class="line">    <span class="comment">// 1表示处理过程出现了错误</span></div><div class="line">    <span class="keyword">unsigned</span>            error:<span class="number">1</span>;</div><div class="line">    <span class="comment">//1表示连接已经销毁</span></div><div class="line">    <span class="keyword">unsigned</span>            destroyed:<span class="number">1</span>;</div><div class="line">    <span class="comment">//1表示连接处于空闲状态，如keepalive两次请求中间的状态</span></div><div class="line">    <span class="keyword">unsigned</span>            idle:<span class="number">1</span>;</div><div class="line">    <span class="comment">//1表示连接可重用，与上面的queue字段对应使</span></div><div class="line">    <span class="keyword">unsigned</span>            reusable:<span class="number">1</span>;</div><div class="line">    <span class="comment">//1表示连接关闭  </span></div><div class="line">    <span class="keyword">unsigned</span>            close:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>            shared:<span class="number">1</span>;</div><div class="line">    <span class="comment">// 1表示正在发送文件数据</span></div><div class="line">    <span class="keyword">unsigned</span>            sendfile:<span class="number">1</span>;</div><div class="line">    <span class="comment">// 1表示连接套接字对应的发送缓冲区必须满足最低设置的大小阀值时，事件驱动模块才会分发该事件</span></div><div class="line">    <span class="keyword">unsigned</span>            sndlowat:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>            tcp_nodelay:<span class="number">2</span>;   <span class="comment">/* ngx_connection_tcp_nodelay_e */</span></div><div class="line">    <span class="keyword">unsigned</span>            tcp_nopush:<span class="number">2</span>;    <span class="comment">/* ngx_connection_tcp_nopush_e */</span></div><div class="line"></div><div class="line">    <span class="keyword">unsigned</span>            need_last_buf:<span class="number">1</span>;</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> (NGX_HAVE_AIO_SENDFILE || NGX_COMPAT)</span></div><div class="line">    <span class="keyword">unsigned</span>            busy_count:<span class="number">2</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> (NGX_THREADS || NGX_COMPAT)</span></div><div class="line">    <span class="keyword">ngx_thread_task_t</span>  *sendfile_task;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h1 id="ngx-listening-s"><a href="#ngx-listening-s" class="headerlink" title="ngx_listening_s"></a>ngx_listening_s</h1><p>与监听有关的数据保存在 ngx_listening_s 定义之中</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> ngx_listening_s  <span class="keyword">ngx_listening_t</span>;</div><div class="line"></div><div class="line"><span class="keyword">struct</span> ngx_listening_s &#123;</div><div class="line">    <span class="comment">// 套接字fd</span></div><div class="line">    <span class="keyword">ngx_socket_t</span>        fd;</div><div class="line">    <span class="comment">// 监听sockaddr地址</span></div><div class="line">    <span class="keyword">struct</span> sockaddr    *sockaddr;</div><div class="line">    <span class="comment">// struct sockaddr 长度 = size of sockaddr</span></div><div class="line">    <span class="keyword">socklen_t</span>           socklen;    </div><div class="line">    <span class="comment">// addr_text 存储字符串形式的ip地址</span></div><div class="line">    <span class="keyword">size_t</span>              addr_text_max_len;</div><div class="line">    <span class="keyword">ngx_str_t</span>           addr_text;</div><div class="line"></div><div class="line">    <span class="comment">//套接字类型 SOCK_STREAM、SOCK_DGRAM、SOCK_RAW</span></div><div class="line">    <span class="keyword">int</span>                 type;</div><div class="line">    <span class="comment">//backlog 长度</span></div><div class="line">    <span class="keyword">int</span>                 backlog;</div><div class="line">    <span class="comment">//套接字接收缓冲区大小 </span></div><div class="line">    <span class="keyword">int</span>                 rcvbuf;</div><div class="line">    <span class="comment">//套接字发送缓冲区大小  </span></div><div class="line">    <span class="keyword">int</span>                 sndbuf;</div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> (NGX_HAVE_KEEPALIVE_TUNABLE)</span></div><div class="line">    <span class="keyword">int</span>                 keepidle;</div><div class="line">    <span class="keyword">int</span>                 keepintvl;</div><div class="line">    <span class="keyword">int</span>                 keepcnt;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line">    <span class="comment">/* handler of accepted connection ,tcp连接建立成功后调用方法*/</span></div><div class="line">    ngx_connection_handler_pt   handler;</div><div class="line">    <span class="comment">//保存当前监听端口对应着的所有主机名</span></div><div class="line">    <span class="keyword">void</span>               *servers;  <span class="comment">/* array of ngx_http_in_addr_t, for example */</span></div><div class="line"></div><div class="line">    <span class="keyword">ngx_log_t</span>           <span class="built_in">log</span>;</div><div class="line">    <span class="keyword">ngx_log_t</span>          *logp;</div><div class="line"></div><div class="line">    <span class="comment">// 内存池的初始大小</span></div><div class="line">    <span class="keyword">size_t</span>              pool_size;</div><div class="line">    <span class="comment">/* should be here because of the AcceptEx() preread */</span></div><div class="line">    <span class="keyword">size_t</span>              post_accept_buffer_size;</div><div class="line">    <span class="comment">/* should be here because of the deferred accept ,连接timeout，超时对其连接*/</span></div><div class="line">    <span class="keyword">ngx_msec_t</span>          post_accept_timeout;</div><div class="line"></div><div class="line">    <span class="keyword">ngx_listening_t</span>    *previous;</div><div class="line">    <span class="comment">// 当前监听句柄对应的ngx_connection_t结构体，注意ngx_connection_t中的 *listening 字段</span></div><div class="line">    <span class="keyword">ngx_connection_t</span>   *connection;</div><div class="line"></div><div class="line">    <span class="keyword">ngx_uint_t</span>          worker;</div><div class="line"></div><div class="line">    <span class="comment">//1表示监听句柄有效，为0表示正常关闭 </span></div><div class="line">    <span class="keyword">unsigned</span>            open:<span class="number">1</span>;</div><div class="line">    <span class="comment">//1表示不关闭原先打开的监听端口，为0表示关闭曾经打开的监听端口</span></div><div class="line">    <span class="keyword">unsigned</span>            remain:<span class="number">1</span>;</div><div class="line">    <span class="comment">//1表示跳过设置当前ngx_listening_t结构体中的套接字，为0时正常初始化套接字</span></div><div class="line">    <span class="keyword">unsigned</span>            ignore:<span class="number">1</span>;</div><div class="line"></div><div class="line">    <span class="keyword">unsigned</span>            bound:<span class="number">1</span>;       <span class="comment">/* already bound */</span></div><div class="line">    <span class="keyword">unsigned</span>            inherited:<span class="number">1</span>;   <span class="comment">/* inherited from previous process */</span></div><div class="line">    <span class="keyword">unsigned</span>            nonblocking_accept:<span class="number">1</span>;</div><div class="line">    <span class="comment">// 1表示当前结构体对应的套接字已经监听</span></div><div class="line">    <span class="keyword">unsigned</span>            listen:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>            nonblocking:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>            shared:<span class="number">1</span>;    <span class="comment">/* shared between threads or processes */</span></div><div class="line">    <span class="comment">// 表示将网络地址转变为字符串形式的地址</span></div><div class="line">    <span class="keyword">unsigned</span>            addr_ntop:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>            wildcard:<span class="number">1</span>;</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> (NGX_HAVE_INET6)</span></div><div class="line">    <span class="keyword">unsigned</span>            ipv6only:<span class="number">1</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line">    <span class="keyword">unsigned</span>            reuseport:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>            add_reuseport:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>            keepalive:<span class="number">2</span>;</div><div class="line"></div><div class="line">    <span class="keyword">unsigned</span>            deferred_accept:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>            delete_deferred:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>            add_deferred:<span class="number">1</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> (NGX_HAVE_DEFERRED_ACCEPT &amp;&amp; defined SO_ACCEPTFILTER)</span></div><div class="line">    <span class="keyword">char</span>               *accept_filter;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> (NGX_HAVE_SETFIB)</span></div><div class="line">    <span class="keyword">int</span>                 setfib;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> (NGX_HAVE_TCP_FASTOPEN)</span></div><div class="line">    <span class="keyword">int</span>                 fastopen;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>ngx_http_request_s 是 Nginx 对 http 请求的封装，定义保存在/src/http/ngx_http_request.h<br>，具体的数据结构如下，</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div><div class="line">189</div><div class="line">190</div><div class="line">191</div><div class="line">192</div><div class="line">193</div><div class="line">194</div><div class="line">195</div><div class="line">196</div><div class="line">197</div><div class="line">198</div><div class="line">199</div><div class="line">200</div><div class="line">201</div><div class="line">202</div><div class="line">203</div><div class="line">204</div><div class="line">205</div><div class="line">206</div><div class="line">207</div><div class="line">208</div><div class="line">209</div><div class="line">210</div><div class="line">211</div><div class="line">212</div><div class="line">213</div><div class="line">214</div><div class="line">215</div><div class="line">216</div><div class="line">217</div><div class="line">218</div><div class="line">219</div><div class="line">220</div><div class="line">221</div><div class="line">222</div><div class="line">223</div><div class="line">224</div><div class="line">225</div><div class="line">226</div><div class="line">227</div><div class="line">228</div><div class="line">229</div><div class="line">230</div><div class="line">231</div><div class="line">232</div><div class="line">233</div><div class="line">234</div><div class="line">235</div><div class="line">236</div><div class="line">237</div><div class="line">238</div><div class="line">239</div><div class="line">240</div><div class="line">241</div><div class="line">242</div><div class="line">243</div><div class="line">244</div><div class="line">245</div><div class="line">246</div><div class="line">247</div><div class="line">248</div><div class="line">249</div><div class="line">250</div><div class="line">251</div><div class="line">252</div><div class="line">253</div><div class="line">254</div><div class="line">255</div><div class="line">256</div><div class="line">257</div><div class="line">258</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> ngx_http_request_s &#123;</div><div class="line">    <span class="keyword">uint32_t</span>                          signature;         <span class="comment">/* "HTTP" */</span></div><div class="line"></div><div class="line">    <span class="comment">//请求对应的客户端连接，是一个指向 ngx_connection_s 结构的指针</span></div><div class="line">    <span class="keyword">ngx_connection_t</span>                 *connection;</div><div class="line">    <span class="comment">//指向存放所有HTTP模块上下文结构体的指针数组  </span></div><div class="line">    <span class="keyword">void</span>                            **ctx;</div><div class="line">    <span class="comment">//指向请求对应的存放main级别配置结构体的指针数组</span></div><div class="line">    <span class="keyword">void</span>                            **main_conf;</div><div class="line">    <span class="comment">//指向请求对应的存放srv级别配置结构体的指针数组</span></div><div class="line">    <span class="keyword">void</span>                            **srv_conf;</div><div class="line">    <span class="comment">//指向请求对应的存放loc级别配置结构体的指针数组</span></div><div class="line">    <span class="keyword">void</span>                            **loc_conf;</div><div class="line"></div><div class="line">    <span class="comment">/* </span></div><div class="line">     * 在接收完http头部，第一次在业务上处理http请求时，http框架提供的处理方法是ngx_http_process_request。 </div><div class="line">     但如果该方法无法一次处理完该请求的全部业务，在归还控制权到epoll时间模块后，该请求再次被回调时， </div><div class="line">     将通过Ngx_http_request_handler方法来处理，而这个方法中对于可读事件的处理就是调用read_event_handler处理请求。 </div><div class="line">     也就是说，http模块希望在底层处理请求的读事件时，重新实现read_event_handler方法 </div><div class="line">    */  </div><div class="line">    ngx_http_event_handler_pt         read_event_handler;</div><div class="line">    ngx_http_event_handler_pt         write_event_handler;</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> (NGX_HTTP_CACHE)</span></div><div class="line">    <span class="keyword">ngx_http_cache_t</span>                 *cache;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line">    <span class="comment">//upstream机制用到的结构体</span></div><div class="line">    <span class="keyword">ngx_http_upstream_t</span>              *upstream;</div><div class="line">    <span class="keyword">ngx_array_t</span>                      *upstream_states;</div><div class="line">                                         <span class="comment">/* of ngx_http_upstream_state_t */</span></div><div class="line">    <span class="comment">//该请求的内存池</span></div><div class="line">    <span class="keyword">ngx_pool_t</span>                       *pool;</div><div class="line">    <span class="comment">//用于保存请求头的缓冲区</span></div><div class="line">    <span class="keyword">ngx_buf_t</span>                        *header_in;</div><div class="line">    <span class="comment">/*ngx_http_process_request_headers在接收、解析完http请求的头部后，会把解析完的每一个http头部加入到headers_in的headers链表中，同时会构造headers_in中的其他成员  */</span></div><div class="line">    <span class="keyword">ngx_http_headers_in_t</span>             headers_in;</div><div class="line">    <span class="comment">/*http模块会把想要发送的http相应信息放到headers_out中，期望http框架将headers_out中的成员序列化为http响应包发送给用户 */</span></div><div class="line">    <span class="keyword">ngx_http_headers_out_t</span>            headers_out;</div><div class="line">    <span class="comment">//接收请求中包体的数据结构</span></div><div class="line">    <span class="keyword">ngx_http_request_body_t</span>          *request_body;</div><div class="line"></div><div class="line">    <span class="comment">//延迟关闭连接的时间</span></div><div class="line">    <span class="keyword">time_t</span>                            lingering_time;</div><div class="line">    <span class="comment">//当前请求初始化时的时间</span></div><div class="line">    <span class="keyword">time_t</span>                            start_sec;</div><div class="line">    <span class="keyword">ngx_msec_t</span>                        start_msec;</div><div class="line"></div><div class="line">    <span class="comment">//下面的9个成员是函数ngx_http_process_request_line方法在接收、解析http请求行时解析出的信息 </span></div><div class="line">    <span class="keyword">ngx_uint_t</span>                        method;</div><div class="line">    <span class="keyword">ngx_uint_t</span>                        http_version;</div><div class="line"></div><div class="line">    <span class="keyword">ngx_str_t</span>                         request_line;</div><div class="line">    <span class="keyword">ngx_str_t</span>                         uri;</div><div class="line">    <span class="keyword">ngx_str_t</span>                         args;</div><div class="line">    <span class="keyword">ngx_str_t</span>                         exten;</div><div class="line">    <span class="comment">//没有进行URL解码的原始请求 </span></div><div class="line">    <span class="keyword">ngx_str_t</span>                         unparsed_uri;</div><div class="line"></div><div class="line">    <span class="keyword">ngx_str_t</span>                         method_name;</div><div class="line">    <span class="keyword">ngx_str_t</span>                         http_protocol;</div><div class="line"></div><div class="line">    <span class="comment">/*表示需要发送给客户端的http响应。out中保存着由headers_out中序列化后的表示http头部的TCP流。 </span></div><div class="line">     * 在调用ngx_http_output_filter方法后，out中还会保存着待发送的http包体，它是实现异步发送http响应的关键。</div><div class="line">     */ </div><div class="line">    <span class="keyword">ngx_chain_t</span>                      *out;</div><div class="line">    <span class="comment">/*当前请求既有可能是用户发来的请求，也可能是派生出的子请求。 </span></div><div class="line">     * 而main标识一系列相关的派生子请求的原始请求。 </div><div class="line">     * 一般可通过main和当前请求的地址是否相等来判断当前请求是否为用户发来的原始请求。</div><div class="line">     */ </div><div class="line">    <span class="keyword">ngx_http_request_t</span>               *main;</div><div class="line">    <span class="comment">//当前请求的父请求（不一定是原始请求）</span></div><div class="line">    <span class="keyword">ngx_http_request_t</span>               *parent;</div><div class="line">    <span class="comment">//与subrequest子请求相关的功能</span></div><div class="line">    <span class="keyword">ngx_http_postponed_request_t</span>     *postponed;</div><div class="line">    <span class="keyword">ngx_http_post_subrequest_t</span>       *post_subrequest;</div><div class="line">    <span class="comment">//所有的子请求都是通过这个单链表链接起来的 </span></div><div class="line">    <span class="keyword">ngx_http_posted_request_t</span>        *posted_requests;</div><div class="line"></div><div class="line">    <span class="comment">/*全局的ngx_http_phase_engine_t结构体中定义了一个ngx_http_phase_handler_t回调方法组成的数组。 </span></div><div class="line">     * 而phase_handler成员则与该数组配合使用。表示请求下次应当执行phase_handler作为序列号指定的数组中的回调方法</div><div class="line">     */ </div><div class="line">    <span class="keyword">ngx_int_t</span>                         phase_handler;</div><div class="line">    <span class="comment">//表示NGX_HTTP_CONTENT_PHASE阶段提供给http模块处理请求的一种方式，它指向http模块实现的请求处理方法 </span></div><div class="line">    ngx_http_handler_pt               content_handler;</div><div class="line">    <span class="comment">//在NGX_HTTP_ACCESS_PHASE节点需要判断请求是否具有访问权限时，通过access_code来传递http模块的handler回调方法的返回值，如果为0表示具备权限。否则不具备。 </span></div><div class="line">    <span class="keyword">ngx_uint_t</span>                        access_code;</div><div class="line"></div><div class="line">    <span class="keyword">ngx_http_variable_value_t</span>        *variables;</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> (NGX_PCRE)</span></div><div class="line">    <span class="keyword">ngx_uint_t</span>                        ncaptures;</div><div class="line">    <span class="keyword">int</span>                              *captures;</div><div class="line">    u_char                           *captures_data;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line">    <span class="keyword">size_t</span>                            limit_rate;</div><div class="line">    <span class="keyword">size_t</span>                            limit_rate_after;</div><div class="line"></div><div class="line">    <span class="comment">/* used to learn the Apache compatible response length without a header */</span></div><div class="line">    <span class="keyword">size_t</span>                            header_size;</div><div class="line"></div><div class="line">    <span class="keyword">off_t</span>                             request_length;</div><div class="line"></div><div class="line">    <span class="keyword">ngx_uint_t</span>                        err_status;</div><div class="line"></div><div class="line">    <span class="keyword">ngx_http_connection_t</span>            *http_connection;</div><div class="line">    <span class="keyword">ngx_http_v2_stream_t</span>             *stream;</div><div class="line"></div><div class="line">    ngx_http_log_handler_pt           log_handler;</div><div class="line"></div><div class="line">    <span class="comment">//在这个请求中如果打开了某些资源，并需要在请求结束时释放，那么需要把定义的释放资源的方法添加到这个成员 </span></div><div class="line">    <span class="keyword">ngx_http_cleanup_t</span>               *cleanup;</div><div class="line">    <span class="comment">//引用计数，每当派生出子请求时，原始请求的count成员都会加一 </span></div><div class="line">    <span class="keyword">unsigned</span>                          count:<span class="number">16</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          subrequests:<span class="number">8</span>;</div><div class="line">    <span class="comment">//阻塞标志位，目前仅由aio使用 </span></div><div class="line">    <span class="keyword">unsigned</span>                          blocked:<span class="number">8</span>;</div><div class="line"></div><div class="line">    <span class="comment">//标志位：为1表示当前请求正在使用异步IO  </span></div><div class="line">    <span class="keyword">unsigned</span>                          aio:<span class="number">1</span>;</div><div class="line"></div><div class="line">    <span class="keyword">unsigned</span>                          http_state:<span class="number">4</span>;</div><div class="line"></div><div class="line">    <span class="comment">/* URI with "/." and on Win32 with "//" */</span></div><div class="line">    <span class="keyword">unsigned</span>                          complex_uri:<span class="number">1</span>;</div><div class="line"></div><div class="line">    <span class="comment">/* URI with "%" */</span></div><div class="line">    <span class="keyword">unsigned</span>                          quoted_uri:<span class="number">1</span>;</div><div class="line"></div><div class="line">    <span class="comment">/* URI with "+" */</span></div><div class="line">    <span class="keyword">unsigned</span>                          plus_in_uri:<span class="number">1</span>;</div><div class="line"></div><div class="line">    <span class="comment">/* URI with " " */</span></div><div class="line">    <span class="keyword">unsigned</span>                          space_in_uri:<span class="number">1</span>;</div><div class="line"></div><div class="line">    <span class="keyword">unsigned</span>                          invalid_header:<span class="number">1</span>;</div><div class="line"></div><div class="line">    <span class="keyword">unsigned</span>                          add_uri_to_alias:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          valid_location:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          valid_unparsed_uri:<span class="number">1</span>;</div><div class="line">    <span class="comment">//标志位：为1时表示URL发生过rewrite重写</span></div><div class="line">    <span class="keyword">unsigned</span>                          uri_changed:<span class="number">1</span>;</div><div class="line">    <span class="comment">//表示使用rewrite重写URL的次数</span></div><div class="line">    <span class="keyword">unsigned</span>                          uri_changes:<span class="number">4</span>;</div><div class="line"></div><div class="line">    <span class="keyword">unsigned</span>                          request_body_in_single_buf:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          request_body_in_file_only:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          request_body_in_persistent_file:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          request_body_in_clean_file:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          request_body_file_group_access:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          request_body_file_log_level:<span class="number">3</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          request_body_no_buffering:<span class="number">1</span>;</div><div class="line"></div><div class="line">    <span class="keyword">unsigned</span>                          subrequest_in_memory:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          waited:<span class="number">1</span>;</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> (NGX_HTTP_CACHE)</span></div><div class="line">    <span class="keyword">unsigned</span>                          cached:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          cache_updater:<span class="number">1</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> (NGX_HTTP_GZIP)</span></div><div class="line">    <span class="keyword">unsigned</span>                          gzip_tested:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          gzip_ok:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          gzip_vary:<span class="number">1</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line">    <span class="keyword">unsigned</span>                          proxy:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          bypass_cache:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          no_cache:<span class="number">1</span>;</div><div class="line"></div><div class="line">    <span class="comment">/*</span></div><div class="line">     * instead of using the request context data in</div><div class="line">     * ngx_http_limit_conn_module and ngx_http_limit_req_module</div><div class="line">     * we use the single bits in the request structure</div><div class="line">     */</div><div class="line">    <span class="keyword">unsigned</span>                          limit_conn_set:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          limit_req_set:<span class="number">1</span>;</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> 0</span></div><div class="line">    <span class="keyword">unsigned</span>                          cacheable:<span class="number">1</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line">    <span class="keyword">unsigned</span>                          pipeline:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          chunked:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          header_only:<span class="number">1</span>;</div><div class="line">    <span class="comment">//标志位，为1表示当前请求时keepalive请求</span></div><div class="line">    <span class="keyword">unsigned</span>                          keepalive:<span class="number">1</span>;</div><div class="line">    <span class="comment">//延迟关闭标志位</span></div><div class="line">    <span class="keyword">unsigned</span>                          lingering_close:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          discard_body:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          reading_body:<span class="number">1</span>;</div><div class="line">    <span class="comment">//标志位：为1表示请求的当前状态是在做内部跳转</span></div><div class="line">    <span class="keyword">unsigned</span>                          internal:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          error_page:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          filter_finalize:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          post_action:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          request_complete:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          request_output:<span class="number">1</span>;</div><div class="line">    <span class="comment">//标志位：为1表示发生给客户端的http响应头已经发送 </span></div><div class="line">    <span class="keyword">unsigned</span>                          header_sent:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          expect_tested:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          root_tested:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          done:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          logged:<span class="number">1</span>;</div><div class="line"></div><div class="line">    <span class="comment">//标志位，表示缓冲中是否有待发送内容</span></div><div class="line">    <span class="keyword">unsigned</span>                          buffered:<span class="number">4</span>;</div><div class="line"></div><div class="line">    <span class="keyword">unsigned</span>                          main_filter_need_in_memory:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          filter_need_in_memory:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          filter_need_temporary:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          allow_ranges:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          subrequest_ranges:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          single_range:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          disable_not_modified:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          stat_reading:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          stat_writing:<span class="number">1</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          stat_processing:<span class="number">1</span>;</div><div class="line"></div><div class="line">    <span class="keyword">unsigned</span>                          health_check:<span class="number">1</span>;</div><div class="line"></div><div class="line">    <span class="comment">/* used to parse HTTP headers */</span></div><div class="line"></div><div class="line">     <span class="comment">//状态机解析http时使用state来表示当前的解析状态，需要检查是否构成完整的http请求行  </span></div><div class="line">    <span class="keyword">ngx_uint_t</span>                        state;</div><div class="line"></div><div class="line">    <span class="keyword">ngx_uint_t</span>                        header_hash;</div><div class="line">    <span class="keyword">ngx_uint_t</span>                        lowcase_index;</div><div class="line">    u_char                            lowcase_header[NGX_HTTP_LC_HEADER_LEN];</div><div class="line"></div><div class="line">    u_char                           *header_name_start;</div><div class="line">    u_char                           *header_name_end;</div><div class="line">    u_char                           *header_start;</div><div class="line">    u_char                           *header_end;</div><div class="line"></div><div class="line">    <span class="comment">/*</span></div><div class="line">     * a memory that can be reused after parsing a request line</div><div class="line">     * via ngx_http_ephemeral_t</div><div class="line">     */</div><div class="line"></div><div class="line">    u_char                           *uri_start;</div><div class="line">    u_char                           *uri_end;</div><div class="line">    u_char                           *uri_ext;</div><div class="line">    u_char                           *args_start;</div><div class="line">    u_char                           *request_start;</div><div class="line">    u_char                           *request_end;</div><div class="line">    u_char                           *method_end;</div><div class="line">    u_char                           *schema_start;</div><div class="line">    u_char                           *schema_end;</div><div class="line">    u_char                           *host_start;</div><div class="line">    u_char                           *host_end;</div><div class="line">    u_char                           *port_start;</div><div class="line">    u_char                           *port_end;</div><div class="line"></div><div class="line">    <span class="keyword">unsigned</span>                          http_minor:<span class="number">16</span>;</div><div class="line">    <span class="keyword">unsigned</span>                          http_major:<span class="number">16</span>;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="http://book.51cto.com/art/201312/420132.htm" target="_blank" rel="external">http://book.51cto.com/art/201312/420132.htm</a><br><a href="http://blog.csdn.net/xiaoliangsky/article/details/39831035?utm_source=tuicool&amp;utm_medium=referral" target="_blank" rel="external">http://blog.csdn.net/xiaoliangsky/article/details/39831035?utm_source=tuicool&amp;utm_medium=referral</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_wechat_pay.jpg" alt="sword2g WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_ali_pay.jpg" alt="sword2g Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Nginx/" rel="tag"># Nginx</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/09/17/nginx-datastructure-ngx_array_t/" rel="next" title="Nginx 基础数据结构(三)">
+                <i class="fa fa-chevron-left"></i> Nginx 基础数据结构(三)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/09/20/nginx-flowchart/" rel="prev" title="Nginx 请求读取流程">
+                Nginx 请求读取流程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/09/20/nginx_connection_s/"
+           data-title="Nginx 基础数据结构(四)" data-url="https://github.com/Sword2G/sword2g.github.io/2016/09/20/nginx_connection_s/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg"
+               alt="sword2g" />
+          <p class="site-author-name" itemprop="name">sword2g</p>
+           
+              <p class="site-description motion-element" itemprop="description">put my notes here</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">30</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="http://sword2g.github.io/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/Sword2G" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/2816511392" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.douban.com/people/97199972/" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/birkhoff-lee" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://my.oschina.net/v5871314" title="梦回雪夜观花" target="_blank">梦回雪夜观花</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Nginx工作流程"><span class="nav-number">1.</span> <span class="nav-text">Nginx工作流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ngx-connection-s-数据结构"><span class="nav-number">2.</span> <span class="nav-text">ngx_connection_s 数据结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ngx-listening-s"><span class="nav-number">3.</span> <span class="nav-text">ngx_listening_s</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div align="center" class="powered-by">
+
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a> 
+  and Themed by -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist</a>
+
+
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sword2g</span>
+  
+</div>
+
+
+
+
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sword2g"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>
