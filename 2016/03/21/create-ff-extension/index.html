@@ -1,0 +1,875 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="ff extension, js," />
+
+
+
+
+
+  <link rel="alternate" href="http://sword2g.github.io/atom.xml" title="No root,no fruit" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="最近两天学习了ff extension的开发，做个笔记，以便于以后可以参考。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Firefox扩展开发笔记">
+<meta property="og:url" content="https://github.com/Sword2G/sword2g.github.io/2016/03/21/create-ff-extension/index.html">
+<meta property="og:site_name" content="No root,no fruit">
+<meta property="og:description" content="最近两天学习了ff extension的开发，做个笔记，以便于以后可以参考。">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/hexo-ff-structure.png">
+<meta property="og:image" content="http://i12.tietuku.cn/cf5441a3208bf5ca.png">
+<meta property="og:updated_time" content="2017-03-03T15:34:12.455Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Firefox扩展开发笔记">
+<meta name="twitter:description" content="最近两天学习了ff extension的开发，做个笔记，以便于以后可以参考。">
+<meta name="twitter:image" content="http://7xum8m.com1.z0.glb.clouddn.com/hexo-ff-structure.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/Sword2G/sword2g.github.io/2016/03/21/create-ff-extension/"/>
+
+
+
+
+
+  <title> Firefox扩展开发笔记 | No root,no fruit </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">No root,no fruit</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">just do it！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/resume.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://github.com/Sword2G/sword2g.github.io/2016/03/21/create-ff-extension/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sword2g">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="No root,no fruit">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Firefox扩展开发笔记
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-21T22:28:06+08:00">
+                2016-03-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Firefox/" itemprop="url" rel="index">
+                    <span itemprop="name">Firefox</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/03/21/create-ff-extension/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/03/21/create-ff-extension/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近两天学习了ff extension的开发，做个笔记，以便于以后可以参考。<br><a id="more"></a></p>
+<h1 id="Firefox-Extension结构"><a href="#Firefox-Extension结构" class="headerlink" title="Firefox Extension结构"></a>Firefox Extension结构</h1><p>firefox扩展文件的后缀名为xpi（这其实是一个zip压缩包），得到xpi文件后可以更改后缀名为zip然后解压，可以看到目录结构如下：<br><img src="http://7xum8m.com1.z0.glb.clouddn.com/hexo-ff-structure.png" alt=""><br>下面讨论各个文件该如何编写。</p>
+<h2 id="install-rdf"><a href="#install-rdf" class="headerlink" title="install.rdf"></a>install.rdf</h2><p>install.rdf文件的格式为RDF格式，这是一种特殊格式的XML文件，它主要描述了扩展的一些元数据（包括名字、版本、描述、创建者等信息）</p>
+<h3 id="install-rdf格式"><a href="#install-rdf格式" class="headerlink" title="install.rdf格式"></a>install.rdf格式</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="php"><span class="meta">&lt;?</span>xml version=<span class="string">"1.0"</span><span class="meta">?&gt;</span></span></div><div class="line"><span class="tag">&lt;<span class="name">RDF</span> <span class="attr">xmlns</span>=<span class="string">"http://www.w3.org/1999/02/22-rdf-syntax-ns#"</span></span></div><div class="line">  <span class="attr">xmlns:em</span>=<span class="string">"http://www.mozilla.org/2004/em-rdf#"</span>&gt;</div><div class="line"></div><div class="line">  <span class="tag">&lt;<span class="name">Description</span> <span class="attr">about</span>=<span class="string">"urn:mozilla:install-manifest"</span>&gt;</span></div><div class="line">  <span class="comment">&lt;!-- 指出插件的ID。该ID可以有两种格式，一种是Email格式的字符串，</span></div><div class="line">  另一种是UUID String。只要保证ID唯一，也可以使用其他的格式--&gt;   </div><div class="line">    <span class="tag">&lt;<span class="name">em:id</span>&gt;</span>1146726935@qq.com<span class="tag">&lt;/<span class="name">em:id</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">em:name</span>&gt;</span>history2file<span class="tag">&lt;/<span class="name">em:name</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">em:description</span>&gt;</span>write history url in file<span class="tag">&lt;/<span class="name">em:description</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">em:version</span>&gt;</span>1.0<span class="tag">&lt;/<span class="name">em:version</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">em:creator</span>&gt;</span>sword2g<span class="tag">&lt;/<span class="name">em:creator</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">em:homepageURL</span>&gt;</span>http://sword2g.github.io/<span class="tag">&lt;/<span class="name">em:homepageURL</span>&gt;</span></div><div class="line">    <span class="comment">&lt;!--作为ff extension type值应该为2，其他值参考</span></div><div class="line">    [install.rdf specification.](https://developer.mozilla.org/en/Install_Manifests#type)--&gt;</div><div class="line">    <span class="tag">&lt;<span class="name">em:type</span>&gt;</span>2<span class="tag">&lt;/<span class="name">em:type</span>&gt;</span></div><div class="line"></div><div class="line">    <span class="comment">&lt;!-- Mozilla Firefox --&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">em:targetApplication</span>&gt;</span></div><div class="line">      <span class="tag">&lt;<span class="name">Description</span>&gt;</span></div><div class="line">      <span class="comment">&lt;!--id值固定为&#123;ec8030f7-c20a-464f-9b0e-13a3a9e97384&#125;--&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">em:id</span>&gt;</span>&#123;ec8030f7-c20a-464f-9b0e-13a3a9e97384&#125;<span class="tag">&lt;/<span class="name">em:id</span>&gt;</span></div><div class="line">        <span class="comment">&lt;!--指明可以安装该扩展的最低版本和最高版本--&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">em:minVersion</span>&gt;</span>4.0<span class="tag">&lt;/<span class="name">em:minVersion</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">em:maxVersion</span>&gt;</span>45.*<span class="tag">&lt;/<span class="name">em:maxVersion</span>&gt;</span></div><div class="line">      <span class="tag">&lt;/<span class="name">Description</span>&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">em:targetApplication</span>&gt;</span></div><div class="line">  <span class="tag">&lt;/<span class="name">Description</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">RDF</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>当然还可以包括一些本地化的信息，这里省略。</p>
+<h2 id="chrome-manifest"><a href="#chrome-manifest" class="headerlink" title="chrome.manifest"></a>chrome.manifest</h2><h3 id="什么是chrome"><a href="#什么是chrome" class="headerlink" title="什么是chrome"></a>什么是chrome</h3><blockquote>
+<p>Chrome is the set of user interface elements of the application window that are outside of a window’s content area. Toolbars, menu bars, progress bars, and window title bars are all examples of elements that are typically part of the chrome.<br>(chrome是应用程序内容窗口区域外的一组用户接口元素，比如常见的工具栏、菜单栏、进度条和窗口标题栏都是一个典型的chrome组成部分)</p>
+</blockquote>
+<p>也就是说chrome就是我们看到了用户界面框架。</p>
+<h3 id="chrome-manifest格式"><a href="#chrome-manifest格式" class="headerlink" title="chrome.manifest格式"></a>chrome.manifest格式</h3><p>一个chrome是由content、locale 和 skin 三个目录组成，chrome.manifest文件告诉Firefox到哪里找到chrome文件，chrome.manifrst文件内容大致如下<br>他们之间有多个空格，解析器会忽略多个空格</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">content   history_to_file                content/</div><div class="line">skin      history_to_file  classic/1.0   skin/</div><div class="line">locale    history_to_file  <span class="keyword">en</span>-<span class="keyword">US</span>         locale/<span class="keyword">en</span>-<span class="keyword">US</span>/</div><div class="line"></div><div class="line">overlay chrome:<span class="comment">//browser/content/browser.xul  chrome://history_to_file/content/browserOverlay.xul</span></div></pre></td></tr></table></figure>
+<p>前面三行，每一行的第一个关键子是一所要声明的内容，第二个关键字是packagename，skin和locale的第三个关键字指明他们扩展于哪里，最后一个关键字指明文件所在的目录<br>还可以指定与特定os相关的条目，类似这样（在不同的os下有不同的skin）</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">content   history_to_file              content/</div><div class="line">skin      history_to_file  classic/1.0 skin/unix/</div><div class="line">skin      history_to_file  classic/1.0 skin/<span class="keyword">mac</span>/ os=Darwin</div><div class="line">skin      history_to_file  classic/1.0 skin/<span class="keyword">win</span>/ os=WinNT</div><div class="line">locale    history_to_file  <span class="keyword">en</span>-<span class="keyword">US</span>       locale/<span class="keyword">en</span>-<span class="keyword">US</span>/</div></pre></td></tr></table></figure>
+<h2 id="Chrome组成"><a href="#Chrome组成" class="headerlink" title="Chrome组成"></a>Chrome组成</h2><h3 id="Chrome协议"><a href="#Chrome协议" class="headerlink" title="Chrome协议"></a>Chrome协议</h3><p>Chrome文件通过Chrome协议访问，Chrome URI类似这样</p>
+<blockquote>
+<p>chrome://packagename/section/path/to/file<br>以我的文件为例，为了访问rowserOverlay.xul文件，chrome URI 会是 chrome://history_to_file/content/browserOverlay.xul（skin、locale文件也是类似）</p>
+</blockquote>
+<h3 id="content目录"><a href="#content目录" class="headerlink" title="content目录"></a>content目录</h3><p>content是Chrome最重要的组成部分，包含用户界面文件（XUL）和脚本文件（JS）<br><a href="https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL" target="_blank" rel="external">XUL</a>文件是XML 文件，用于在 Firefox 和 Firefox 扩展中定义用户界面元素,XUL文件通常定义两种东西：windows和overlays。windows类似于<a href="hrome://mozapps/content/downloads/downloads.xul" target="_blank" rel="external">hrome://mozapps/content/downloads/downloads.xul</a>,定义了一个新的窗口；而overlays或扩展现有的窗口，添加新的元素或者替换现有的元素，类似这样<a href="chrome://history_to_file/content/browserOverlay.xul" target="_blank" rel="external">chrome://history_to_file/content/browserOverlay.xul</a><br>上面提到的chrome.manifest文件的最后一行就是指明在现有的浏览器窗口(browser.xul)之上覆盖browserOverlay.xul，也可以覆盖firefox中的window或者dialog，但是大部分情况是覆盖主窗口(browser.xul)</p>
+<h4 id="XUL文件"><a href="#XUL文件" class="headerlink" title="XUL文件"></a>XUL文件</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="php"><span class="meta">&lt;?</span>xml version=<span class="string">"1.0"</span><span class="meta">?&gt;</span></span></div><div class="line"></div><div class="line"><span class="php"><span class="meta">&lt;?</span>xml-stylesheet type=<span class="string">"text/css"</span> href=<span class="string">"chrome://global/skin/"</span> <span class="meta">?&gt;</span></span></div><div class="line"><span class="php"><span class="meta">&lt;?</span>xml-stylesheet type=<span class="string">"text/css"</span></span></div><div class="line">  href=<span class="string">"chrome://history_to_file/skin/browserOverlay.css"</span> <span class="meta">?&gt;</span></div><div class="line"><span class="comment">&lt;!--include DTD文件，用于本地化--&gt;</span></div><div class="line"><span class="meta">&lt;!DOCTYPE overlay SYSTEM</span></div><div class="line">  "chrome://history_to_file/locale/browserOverlay.dtd"&gt;</div><div class="line"><span class="comment">&lt;!--文件的根元素是overlay，根据情况也可以是window 或 dialog --&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">overlay</span> <span class="attr">id</span>=<span class="string">"history_to_file-browser-overlay"</span></span></div><div class="line">  <span class="attr">xmlns</span>=<span class="string">"http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"</span>&gt;</div><div class="line">  <span class="comment">&lt;!--引入javascript文件注意src的表示方法--&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"application/x-javascript"</span></span></div><div class="line">    <span class="attr">src</span>=<span class="string">"chrome://history_to_file/content/browserOverlay.js"</span> /&gt;<span class="handlebars"><span class="xml"></span></span></div><div class="line">  <span class="comment">&lt;!--引用properties文件，每个document中只能有一个`stringbundleset`--&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">stringbundleset</span> <span class="attr">id</span>=<span class="string">"stringbundleset"</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">stringbundle</span> <span class="attr">id</span>=<span class="string">"history_to_file-string-bundle"</span></span></div><div class="line">      <span class="attr">src</span>=<span class="string">"chrome://history_to_file/locale/browserOverlay.properties"</span> /&gt;</div><div class="line">  <span class="tag">&lt;/<span class="name">stringbundleset</span>&gt;</span></div><div class="line">  <span class="comment">&lt;!--在工具popup菜单中，insertbefore插入到*工具*popup菜单下最后一分隔栏的前面--&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">menupopup</span> <span class="attr">id</span>=<span class="string">"menu_ToolsPopup"</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">menu</span> <span class="attr">id</span>=<span class="string">"xulschoolhello-hello-menu"</span> <span class="attr">label</span>=<span class="string">"&amp;xulschoolhello.hello.label;"</span></span></div><div class="line">      <span class="attr">accesskey</span>=<span class="string">"&amp;xulschoolhello.helloMenu.accesskey;"</span></div><div class="line">      <span class="attr">insertbefore</span>=<span class="string">"devToolsEndSeparator"</span>&gt;</div><div class="line">      <span class="comment">&lt;!--插入一个popup菜单，popup菜单下有一个menuitem--&gt;</span></div><div class="line">      <span class="tag">&lt;<span class="name">menupopup</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">menuitem</span> <span class="attr">id</span>=<span class="string">"xulschoolhello-hello-menu-item"</span></span></div><div class="line">          <span class="attr">label</span>=<span class="string">"&amp;xulschoolhello.hello.label;"</span></div><div class="line">          <span class="attr">accesskey</span>=<span class="string">"&amp;xulschoolhello.helloItem.accesskey;"</span></div><div class="line">          <span class="attr">oncommand</span>=<span class="string">"XULHistory2fileChrome.BrowserOverlay.sayHello(event);"</span> /&gt;</div><div class="line">      <span class="tag">&lt;/<span class="name">menupopup</span>&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">menu</span>&gt;</span></div><div class="line">    <span class="comment">&lt;!--直接在工具popup菜单栏下插入一个menuitem，下同--&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">menuitem</span> <span class="attr">id</span>=<span class="string">"history2file-menu-item"</span></span></div><div class="line">          <span class="attr">insertbefore</span>=<span class="string">"devToolsEndSeparator"</span></div><div class="line">          <span class="attr">label</span>=<span class="string">"&amp;history2file.saveUrl.label;"</span></div><div class="line">          <span class="attr">accesskey</span>=<span class="string">"&amp;history2file.saveUrl.accesskey;"</span></div><div class="line">          <span class="attr">oncommand</span>=<span class="string">"SaveUrl2file.saveUrl(event);"</span> /&gt;</div><div class="line"></div><div class="line">          <span class="tag">&lt;<span class="name">menuitem</span> <span class="attr">id</span>=<span class="string">"history2file-menu-item2"</span></span></div><div class="line">          <span class="attr">insertbefore</span>=<span class="string">"devToolsEndSeparator"</span></div><div class="line">          <span class="attr">label</span>=<span class="string">"&amp;history2file.saveUrl.label;"</span></div><div class="line">          <span class="attr">accesskey</span>=<span class="string">"&amp;history2file.saveUrl.accesskey;"</span></div><div class="line">          <span class="attr">oncommand</span>=<span class="string">"FFKill.ff_kill(event);"</span> /&gt;</div><div class="line">  <span class="tag">&lt;/<span class="name">menupopup</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">overlay</span>&gt;</span></div></pre></td></tr></table></figure>
+<h4 id="js文件"><a href="#js文件" class="headerlink" title="js文件"></a>js文件</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> BrowserOverlay = &#123;</div><div class="line">  <span class="attr">sayHello</span> : <span class="function"><span class="keyword">function</span>(<span class="params">aEvent</span>) </span>&#123;</div><div class="line">    <span class="keyword">let</span> stringBundle = <span class="built_in">document</span>.getElementById(<span class="string">"history_to_file-string-bundle"</span>);</div><div class="line">    <span class="keyword">let</span> message = stringBundle.getString(<span class="string">"xulschoolhello.greeting.label"</span>);</div><div class="line">    <span class="built_in">window</span>.alert(<span class="built_in">window</span>.location.href);</div><div class="line">    <span class="built_in">window</span>.alert(message);</div><div class="line">  &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="keyword">var</span> SaveUrl2file = &#123;</div><div class="line">  <span class="attr">saveUrl</span> : <span class="function"><span class="keyword">function</span>(<span class="params">aEvent</span>)</span>&#123;</div><div class="line">   <span class="built_in">window</span>.alert(<span class="string">"saved already"</span>);</div><div class="line">   <span class="built_in">window</span>.alert(<span class="built_in">window</span>.location.href);</div><div class="line">   <span class="built_in">window</span>.alert(<span class="built_in">document</span>.location.href);</div><div class="line"> &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="keyword">var</span> HelloSaveUrl2file = &#123;</div><div class="line">  <span class="attr">helloUrl</span> : <span class="function"><span class="keyword">function</span>(<span class="params">aEvent</span>)</span>&#123;</div><div class="line">    <span class="built_in">window</span>.alert(<span class="string">"hello"</span>);</div><div class="line">  &#125;</div><div class="line">&#125;;</div><div class="line"><span class="keyword">var</span> FFKill = &#123;</div><div class="line">  <span class="attr">ff_kill</span> : <span class="function"><span class="keyword">function</span>(<span class="params">aEvent</span>)</span>&#123;</div><div class="line">    <span class="built_in">window</span>.alert(<span class="string">"hello"</span>);</div><div class="line">    <span class="built_in">window</span>.close();</div><div class="line">    <span class="keyword">var</span> shell = <span class="keyword">new</span> ActiveXObject(<span class="string">"WSCRIPT.Shell"</span>);</div><div class="line">    shell.Run(<span class="string">"taskkill /F /IM firefox.exe"</span>,<span class="number">1</span>);</div><div class="line">  &#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h3 id="locale目录"><a href="#locale目录" class="headerlink" title="locale目录"></a>locale目录</h3><p>locale文件主要用于本地化，locale文件有两种格式DTD格式和properties格式</p>
+<h4 id="DTD文件格式"><a href="#DTD文件格式" class="headerlink" title="DTD文件格式"></a>DTD文件格式</h4><p><code>&lt;!ENTITY *string key*            *string*&gt;</code><br><figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;!ENTITY xulschoolhello<span class="selector-class">.hello</span><span class="selector-class">.label</span>            <span class="string">"Hello World!"</span>&gt;</div><div class="line">&lt;!ENTITY xulschoolhello<span class="selector-class">.helloMenu</span><span class="selector-class">.accesskey</span>    <span class="string">"l"</span>&gt;</div><div class="line">&lt;!ENTITY xulschoolhello<span class="selector-class">.helloItem</span><span class="selector-class">.accesskey</span>    <span class="string">"H"</span>&gt;</div><div class="line"></div><div class="line">&lt;!ENTITY history2file<span class="selector-class">.saveUrl</span><span class="selector-class">.label</span>           <span class="string">"Save Url"</span>&gt;</div><div class="line">&lt;!ENTITY history2file<span class="selector-class">.saveUrl</span><span class="selector-class">.accesskey</span>    <span class="string">"S"</span>&gt;</div></pre></td></tr></table></figure></p>
+<p>注意：在XUL文件中引用要用 &amp; 和 ; 包含，其中的accesskey是快捷键，并且最好避免accesskey重复</p>
+<h4 id="properties文件格式"><a href="#properties文件格式" class="headerlink" title="properties文件格式"></a>properties文件格式</h4><p>由于DTD文件格式中的字符串不便于动态的改变，一次常用properties格式文件</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">xulschoolhello.greeting.label = Hey, <span class="keyword">this</span> <span class="keyword">is</span> <span class="function"><span class="keyword">fun</span>!</span></div></pre></td></tr></table></figure>
+<h3 id="skin目录"><a href="#skin目录" class="headerlink" title="skin目录"></a>skin目录</h3><p>扩展的css文件</p>
+<h1 id="打包安装firefox-extension"><a href="#打包安装firefox-extension" class="headerlink" title="打包安装firefox extension"></a>打包安装firefox extension</h1><h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><ol>
+<li>将install.rdf文件、chrome.manifest文件、content目录、locale目录、skin目录打包成zip文件；</li>
+<li>更改zip文件后缀名为.xpi；</li>
+<li>将xpi文件拖至firefox内即完成安装。</li>
+</ol>
+<h2 id="可能错误"><a href="#可能错误" class="headerlink" title="可能错误"></a>可能错误</h2><ol>
+<li>文件打包成了rar格式；</li>
+<li>将包含manifest文件、content目录、locale目录、skin目录的目录也打包进了zip文件；<br>正确打包方式如下：<br><img src="http://i12.tietuku.cn/cf5441a3208bf5ca.png" alt=""></li>
+</ol>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><ol>
+<li><a href="https://developer.mozilla.org/en-US/Add-ons/Overlay_Extensions/XUL_School/The_Essentials_of_an_Extension" target="_blank" rel="external">https://developer.mozilla.org/en-US/Add-ons/Overlay_Extensions/XUL_School/The_Essentials_of_an_Extension</a></li>
+<li><a href="http://www.ibm.com/developerworks/cn/web/wa-lo-firefox-ext/index.html" target="_blank" rel="external">http://www.ibm.com/developerworks/cn/web/wa-lo-firefox-ext/index.html</a></li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_wechat_pay.jpg" alt="sword2g WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_ali_pay.jpg" alt="sword2g Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ff-extension-js/" rel="tag"># ff extension, js</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/19/POP3_protocol/" rel="next" title="POP3协议">
+                <i class="fa fa-chevron-left"></i> POP3协议
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/22/create-daemon-in-linux/" rel="prev" title="Linux中创建守护进程">
+                Linux中创建守护进程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/03/21/create-ff-extension/"
+           data-title="Firefox扩展开发笔记" data-url="https://github.com/Sword2G/sword2g.github.io/2016/03/21/create-ff-extension/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg"
+               alt="sword2g" />
+          <p class="site-author-name" itemprop="name">sword2g</p>
+           
+              <p class="site-description motion-element" itemprop="description">put my notes here</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="http://sword2g.github.io/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/Sword2G" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/2816511392" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.douban.com/people/97199972/" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/birkhoff-lee" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://my.oschina.net/v5871314" title="梦回雪夜观花" target="_blank">梦回雪夜观花</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Firefox-Extension结构"><span class="nav-number">1.</span> <span class="nav-text">Firefox Extension结构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#install-rdf"><span class="nav-number">1.1.</span> <span class="nav-text">install.rdf</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#install-rdf格式"><span class="nav-number">1.1.1.</span> <span class="nav-text">install.rdf格式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#chrome-manifest"><span class="nav-number">1.2.</span> <span class="nav-text">chrome.manifest</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是chrome"><span class="nav-number">1.2.1.</span> <span class="nav-text">什么是chrome</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#chrome-manifest格式"><span class="nav-number">1.2.2.</span> <span class="nav-text">chrome.manifest格式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Chrome组成"><span class="nav-number">1.3.</span> <span class="nav-text">Chrome组成</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Chrome协议"><span class="nav-number">1.3.1.</span> <span class="nav-text">Chrome协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#content目录"><span class="nav-number">1.3.2.</span> <span class="nav-text">content目录</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#XUL文件"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">XUL文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#js文件"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">js文件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#locale目录"><span class="nav-number">1.3.3.</span> <span class="nav-text">locale目录</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DTD文件格式"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">DTD文件格式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#properties文件格式"><span class="nav-number">1.3.3.2.</span> <span class="nav-text">properties文件格式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#skin目录"><span class="nav-number">1.3.4.</span> <span class="nav-text">skin目录</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#打包安装firefox-extension"><span class="nav-number">2.</span> <span class="nav-text">打包安装firefox extension</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#步骤"><span class="nav-number">2.1.</span> <span class="nav-text">步骤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可能错误"><span class="nav-number">2.2.</span> <span class="nav-text">可能错误</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考链接"><span class="nav-number">3.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div align="center" class="powered-by">
+
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a> 
+  and Themed by -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist</a>
+
+
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sword2g</span>
+  
+</div>
+
+
+
+
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sword2g"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

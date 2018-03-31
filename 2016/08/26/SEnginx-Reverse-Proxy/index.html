@@ -1,0 +1,878 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Nginx," />
+
+
+
+
+
+  <link rel="alternate" href="http://sword2g.github.io/atom.xml" title="No root,no fruit" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="代理服务器是一个作为客户端与目标服务器之间的中介服务器，主要完成客户端与目标服务器之间请求和响应的转发工作。它分为正向代理和反向代理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SEnginx 反向代理搭建测试">
+<meta property="og:url" content="https://github.com/Sword2G/sword2g.github.io/2016/08/26/SEnginx-Reverse-Proxy/index.html">
+<meta property="og:site_name" content="No root,no fruit">
+<meta property="og:description" content="代理服务器是一个作为客户端与目标服务器之间的中介服务器，主要完成客户端与目标服务器之间请求和响应的转发工作。它分为正向代理和反向代理。">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/nginx_%E6%AD%A3%E5%90%91%E4%BB%A3%E7%90%86.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/nginx_%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/nginx_%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E6%9E%B6%E6%9E%84.jpg">
+<meta property="og:updated_time" content="2016-12-28T14:58:11.135Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SEnginx 反向代理搭建测试">
+<meta name="twitter:description" content="代理服务器是一个作为客户端与目标服务器之间的中介服务器，主要完成客户端与目标服务器之间请求和响应的转发工作。它分为正向代理和反向代理。">
+<meta name="twitter:image" content="http://7xum8m.com1.z0.glb.clouddn.com/nginx_%E6%AD%A3%E5%90%91%E4%BB%A3%E7%90%86.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/Sword2G/sword2g.github.io/2016/08/26/SEnginx-Reverse-Proxy/"/>
+
+
+
+
+
+  <title> SEnginx 反向代理搭建测试 | No root,no fruit </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">No root,no fruit</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">just do it！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/resume.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://github.com/Sword2G/sword2g.github.io/2016/08/26/SEnginx-Reverse-Proxy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sword2g">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="No root,no fruit">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                SEnginx 反向代理搭建测试
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-08-26T22:43:34+08:00">
+                2016-08-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Server/" itemprop="url" rel="index">
+                    <span itemprop="name">Server</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/08/26/SEnginx-Reverse-Proxy/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/26/SEnginx-Reverse-Proxy/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>代理服务器是一个作为客户端与目标服务器之间的中介服务器，主要完成客户端与目标服务器之间请求和响应的转发工作。它分为正向代理和反向代理。<br><a id="more"></a></p>
+<h1 id="正向代理"><a href="#正向代理" class="headerlink" title="正向代理"></a>正向代理</h1><p>正向服务器可以理解为客户端的代理人。客户端为了能从目标服务器取得内容，首先向代理服务器发送一个请求，并且指定目标服务器，之后代理服务器向目标服务器转交请求，获得请求的内容并转交返回给客户端。它向内部网络提供访问外部网络资源的途径，作为客户代理。</p>
+<p><img src="http://7xum8m.com1.z0.glb.clouddn.com/nginx_%E6%AD%A3%E5%90%91%E4%BB%A3%E7%90%86.jpg" alt="正向代理"></p>
+<h2 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h2><h3 id="加快客户端的请求应答"><a href="#加快客户端的请求应答" class="headerlink" title="加快客户端的请求应答"></a>加快客户端的请求应答</h3><p>代理服务器可以缓存某些资源（如页面），当客户端需要再次请求该资源的时候，代理服务器可以将其缓存的该资源直接返回给客户端而不用再次转发请求，重新从目标服务器取得资源。</p>
+<h3 id="减少出口的流量，节约带宽"><a href="#减少出口的流量，节约带宽" class="headerlink" title="减少出口的流量，节约带宽"></a>减少出口的流量，节约带宽</h3><p>由于缓存的机制，出口减少的很多请求流量，节约了带宽。</p>
+<h3 id="访问受限资源"><a href="#访问受限资源" class="headerlink" title="访问受限资源"></a>访问受限资源</h3><p>客户端可能无法直接访问目标服务器资源，由代理服务器代替客户端取得资源后再将资源转发给客户端。</p>
+<h3 id="隐藏客户端身份"><a href="#隐藏客户端身份" class="headerlink" title="隐藏客户端身份"></a>隐藏客户端身份</h3><p>真正的请求资源的是代理服务器，所以目标服务器并不知道真实的客户身份</p>
+<h1 id="反向代理"><a href="#反向代理" class="headerlink" title="反向代理"></a>反向代理</h1><p>反向代理可以理解为服务器端的代理人。反向代理对客户端是透明的，客户端并不知道反向代理的存在。客户端向目标服务器发送请求的时候实际上是由反向代理服务器首先收到请求，反向代理服务器可以根据相应的策略，将客户端的请求转发给真正的目标服务器。它向外部网络提供访问内部网络资源的途径，作为服务器代理。</p>
+<p><img src="http://7xum8m.com1.z0.glb.clouddn.com/nginx_%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8.jpg" alt="反向代理"></p>
+<h2 id="作用-1"><a href="#作用-1" class="headerlink" title="作用"></a>作用</h2><h3 id="安全"><a href="#安全" class="headerlink" title="安全"></a>安全</h3><p>由于客户端的请求首先需要经过代理服务器，代理服务器在对客户端的请求进行合法化的检查之后再将请求转发给真正的目标服务器，保证了目标服务器的安全。</p>
+<h3 id="缓解目标服务器压力"><a href="#缓解目标服务器压力" class="headerlink" title="缓解目标服务器压力"></a>缓解目标服务器压力</h3><p>代理服务器可以缓存某些资源，减少对真是目标服务器的请求。</p>
+<h3 id="实现负载均衡"><a href="#实现负载均衡" class="headerlink" title="实现负载均衡"></a>实现负载均衡</h3><p>根据某些策略将客户端请求转发到服务器集群中的不同服务器，平衡集群中各个服务器的负载压力。</p>
+<h1 id="SEnginx-Security-Enhanced-NGINX"><a href="#SEnginx-Security-Enhanced-NGINX" class="headerlink" title="SEnginx (Security Enhanced NGINX)"></a><a href="http://www.senginx.org/cn/index.php/%E9%A6%96%E9%A1%B5" target="_blank" rel="external">SEnginx (Security Enhanced NGINX)</a></h1><blockquote>
+<p>SEnginx（Security Enhanced NGINX）是著名的 HTTP 和 反向代理 服务器nginx的一个变种版本，主要是在原版nginx的基础上增加了多种Web安全功能，并增强了应用交付等方面的原有功能。SEnginx继承了nginx的全部原始特性，全面兼容标准nginx的配置，此外也吸收了一些源自tengine等优秀nginx变种的高级特性以及一些常用的第三方nginx模块。</p>
+</blockquote>
+<h2 id="SEnginx-主要功能"><a href="#SEnginx-主要功能" class="headerlink" title="SEnginx 主要功能"></a>SEnginx 主要功能</h2><h3 id="负载均衡"><a href="#负载均衡" class="headerlink" title="负载均衡"></a>负载均衡</h3><p>SEnginx 中集成了 nginx_tcp_proxy_module，为用户提供 tcp 的反向代理和负载均衡功能。<br>负载均衡功能在 upstream 上下文中进行配置。负载均衡的算法支持 fastest 算法（响应速度快的服务器应该有能力处理更多请求） 和 fair 算法（“闲者优先”，主要判断依据是各个 backend 上的链接数和和失败数）。</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">upstream <span class="keyword">backend </span>&#123;</div><div class="line">    	fastest<span class="comment">;</span></div><div class="line">    	<span class="comment"># fair;</span></div><div class="line">        server <span class="number">127</span>.<span class="number">0</span>.<span class="number">0</span>.<span class="number">1</span>:<span class="number">8087</span> <span class="comment">;</span></div><div class="line">    	server <span class="number">127</span>.<span class="number">0</span>.<span class="number">0</span>.<span class="number">1</span>:<span class="number">8085</span> <span class="comment">;</span></div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<h3 id="会话保持"><a href="#会话保持" class="headerlink" title="会话保持"></a>会话保持</h3><p>在使用负载均衡功能的网站会要求属于同一会话的请求必须交付给相同的服务器，由 persistence 模块实现。</p>
+<p>persistence有三种标识会话的方式：</p>
+<ul>
+<li><p>插入HTTP cookie来标识会话<br>persistence 模块在其响应中设置”Set-Cookie”头，浏览器发送下一次请求时带上这个 cookie<br>persistence 模块根据 cookie 判断应该转发给那个服务器</p>
+</li>
+<li><p>监听现有会话的cookie来标识会话<br>persistence 模块再添加包含 server信息的特定 cookie；在服务器设置的cookie存在时persistence功能才会有效。</p>
+</li>
+<li><p>基于session功能来标识会话<br>persistence 模块会基于 session 中记录的信息进行会话保持。在这种情况下，persistence 的超时时间和session的超时时间相同</p>
+</li>
+</ul>
+<h3 id="缓存类型设置"><a href="#缓存类型设置" class="headerlink" title="缓存类型设置"></a>缓存类型设置</h3><p>可以针对针应答类型进行缓存，而不仅仅是请求的类型。</p>
+<h3 id="服务器健康检查"><a href="#服务器健康检查" class="headerlink" title="服务器健康检查"></a><a href="http://tengine.taobao.org/document_cn/http_upstream_check_cn.html" target="_blank" rel="external">服务器健康检查</a></h3><p>代理服务器定时周期性的向后端服务器发送健康检查数据包，代理可以通过后端服务器给出的响应判断后端服务器 down 还是 up。</p>
+<h3 id="访问行为识别"><a href="#访问行为识别" class="headerlink" title="访问行为识别"></a>访问行为识别</h3><p>可以设置某个目录下的资源为敏感资源，在一定的时间内，如果客户端对敏感资源的访问 percent 都达到某个阈值，就可以初步判断该访问为机器人或是恶意攻击，根据相应的策略可以对客户端进行限速或进行机器人挑战（判断是否是机器人）。</p>
+<h3 id="基于条件的限速功能"><a href="#基于条件的限速功能" class="headerlink" title="基于条件的限速功能"></a>基于条件的限速功能</h3><p>本功能基于tengine的limit_req模块，该模块针对原始nginx的limit_req功能在IP白名单、多条件限速以及forbid_action等方面进行了增强，SEnginx在此基础上增加了condition参数，只有条件为真时才执行限速动作，这样limit_req模块和机器人缓解模块以及访问行为识别模块配合使用，可以实现更加严格且多样化的限速策略</p>
+<h3 id="Robot-Mitigation（机器人缓解）"><a href="#Robot-Mitigation（机器人缓解）" class="headerlink" title="Robot Mitigation（机器人缓解）"></a>Robot Mitigation（机器人缓解）</h3><p>Robot Mitigation 模块采用了一种基于“挑战”的验证方法，即向客户端发送特定的、浏览器能解析的应答（特定的js 脚本或swf flash 文件），如果客户端是真实的浏览器，则会重新触发请求，并带有一个特定的Cookie值，Robot Mitigation 模块会依据此 Cookie 的信息来判断是否是机器人。</p>
+<h3 id="黑白名单"><a href="#黑白名单" class="headerlink" title="黑白名单"></a>黑白名单</h3><p>当某个源IP地址在1秒内发生指定的攻击次数时，将此IP地址加入到IP黑名单中，并阻断此IP一段时间。</p>
+<h3 id="带DNS反查的User-Agent白名单"><a href="#带DNS反查的User-Agent白名单" class="headerlink" title="带DNS反查的User-Agent白名单"></a>带DNS反查的User-Agent白名单</h3><p>DNS反查，根据请求的源IP地址，查询DNS服务器获取域名，如果域名和用户定义的正则pattern匹配，则此白名单才命中。此机制是为了防止User-Agent伪造为知名机器人。</p>
+<h3 id="Cookie-防篡改"><a href="#Cookie-防篡改" class="headerlink" title="Cookie 防篡改"></a>Cookie 防篡改</h3><p>Cookie Poisoning 模块能监控服务器发出的 Set-Cookie 头以及设置的 cookie 值，如果 cookie 的值在客户端被修改，则此模块会检测出修改，并执行动作。</p>
+<h3 id="网页防篡改"><a href="#网页防篡改" class="headerlink" title="网页防篡改"></a>网页防篡改</h3><p>在请求到达 SEnginx 的时候核查文件水印（由原始文件生成的 hash 文件）是否有变化，从而达到防篡改的目的。防篡改模块可以和 nginx 配合以达到在篡改发生时，可以将请求重定向到备份的目录，恢复网页内容的功能。</p>
+<h3 id="安全会话机制"><a href="#安全会话机制" class="headerlink" title="安全会话机制"></a>安全会话机制</h3><p>Session会在客户端的浏览器设置一个 Cookie 用于记录会话信息</p>
+<h1 id="SEnginx-配置示例"><a href="#SEnginx-配置示例" class="headerlink" title="SEnginx 配置示例"></a>SEnginx 配置示例</h1><h2 id="实现环境"><a href="#实现环境" class="headerlink" title="实现环境"></a>实现环境</h2><p>由于实验环境的限制，我们将 SEnginx (作为反向代理)和 apache2 (作为服务器)部署同一台计算机上。SEnginx 监听 http 80 端口，而 web 服务器分别以不同的端口号(8085 和 8087)部署在同一个 apache2 服务器上，代表两个不同的 web 服务器，当用户访问 localhost 时，SEnginx 作为反向代理将请求均衡地转发给 apache 2 不同端口的 Web 应用程序进行处理。架构如下图所示：</p>
+<p><img src="http://7xum8m.com1.z0.glb.clouddn.com/nginx_%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E6%9E%B6%E6%9E%84.jpg" alt="SEnginx 反向代理架构"></p>
+<h2 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h2><figure class="highlight vala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div><div class="line">189</div><div class="line">190</div><div class="line">191</div><div class="line">192</div><div class="line">193</div><div class="line">194</div><div class="line">195</div><div class="line">196</div><div class="line">197</div><div class="line">198</div><div class="line">199</div><div class="line">200</div><div class="line">201</div><div class="line">202</div><div class="line">203</div><div class="line">204</div><div class="line">205</div><div class="line">206</div><div class="line">207</div><div class="line">208</div><div class="line">209</div><div class="line">210</div><div class="line">211</div><div class="line">212</div><div class="line">213</div><div class="line">214</div><div class="line">215</div><div class="line">216</div><div class="line">217</div><div class="line">218</div><div class="line">219</div><div class="line">220</div><div class="line">221</div><div class="line">222</div><div class="line">223</div><div class="line">224</div><div class="line">225</div><div class="line">226</div><div class="line">227</div><div class="line">228</div><div class="line">229</div><div class="line">230</div><div class="line">231</div><div class="line">232</div><div class="line">233</div><div class="line">234</div><div class="line">235</div><div class="line">236</div><div class="line">237</div><div class="line">238</div><div class="line">239</div><div class="line">240</div><div class="line">241</div><div class="line">242</div><div class="line">243</div><div class="line">244</div><div class="line">245</div><div class="line">246</div><div class="line">247</div><div class="line">248</div><div class="line">249</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#运行的用户</span></div><div class="line"><span class="meta">#user  nobody;</span></div><div class="line"><span class="meta"># worker 工作进程的个数，master进程是接收并分配请求给worker处理，通常和cpu数量相同</span></div><div class="line">worker_processes  <span class="number">1</span>;</div><div class="line"><span class="meta"># 错误日志及日志级别[debug, info, notice, warn, error, crit],默认 error</span></div><div class="line">error_log  logs/error.log  notice;</div><div class="line"><span class="meta"># pid 文件</span></div><div class="line">pid        logs/nginx.pid;</div><div class="line"></div><div class="line"></div><div class="line">events &#123;</div><div class="line"><span class="meta"># IO 复用模型 2.6 以上内核支持，Linux 默认 IO 模型</span></div><div class="line"><span class="meta">#    use   epoll;</span></div><div class="line"><span class="meta">#   单个 worker process 上的最大并发数</span></div><div class="line">    worker_connections  <span class="number">1024</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="meta"># http 服务相关参数</span></div><div class="line">http &#123;</div><div class="line"><span class="meta">#   设定mime类型,类型由mime.type文件定义</span></div><div class="line">    include       mime.types;</div><div class="line">    default_type  application/octet-stream;</div><div class="line"></div><div class="line"><span class="meta">#   服务器日志格式，以下为默认格式</span></div><div class="line">    #log_format  main  <span class="string">'$remote_addr - $remote_user [$time_local] "$request" '</span></div><div class="line">    #                  <span class="string">'$status $body_bytes_sent "$http_referer" '</span></div><div class="line">    #                  <span class="string">'"$http_user_agent" "$http_x_forwarded_for"'</span>;</div><div class="line"></div><div class="line"><span class="meta">#   开启高效文件传输模式，sendfile指令指定nginx是否调用sendfile函数来输出文件，  </span></div><div class="line"><span class="meta">#   减少用户空间到内核空间的上下文切换。</span></div><div class="line"><span class="meta">#	对于普通应用设为on，如果用来进行下载等应用磁盘IO重负载应用，可设置为off，</span></div><div class="line"><span class="meta">#	以平衡磁盘与网络I/O处理速度，降低系统的负载。</span></div><div class="line">    sendfile        on;</div><div class="line"></div><div class="line"><span class="meta">#   与 tcp_nodelay 互斥  </span></div><div class="line"><span class="meta">#   开启 Nagle 算法，等到数据包最大时，一次性的传输出去，这样有助于解决网络堵塞</span></div><div class="line">    tcp_nopush     on;</div><div class="line"></div><div class="line"><span class="meta">#   连接超时时间</span></div><div class="line"><span class="meta">#   keepalive_timeout  0;</span></div><div class="line">    keepalive_timeout  <span class="number">65</span>;</div><div class="line"></div><div class="line"><span class="meta">#   开启gzip压缩</span></div><div class="line">    gzip  on;</div><div class="line"><span class="meta">#   session 最大 size</span></div><div class="line">    session_max_size <span class="number">1024</span>;</div><div class="line"></div><div class="line"><span class="meta">#   SEnginx blacklist 开启</span></div><div class="line">    ip_blacklist on;</div><div class="line"><span class="meta">#   blacklist 大小</span></div><div class="line">    ip_blacklist_size <span class="number">10240</span>;</div><div class="line"><span class="meta">#   blacklis 超时时间</span></div><div class="line">    ip_blacklist_timeout <span class="number">60</span>;</div><div class="line">	</div><div class="line"><span class="meta">#   global User-Agent whitelist </span></div><div class="line">    whitelist_ua $ua_wl_dns &#123;</div><div class="line">    	caseless;</div><div class="line">    	<span class="string">"baiduspider"</span> <span class="string">".*\.baidu\.com"</span>;</div><div class="line">    	<span class="string">"googlebot"</span> <span class="string">".*\.google\.com"</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line"><span class="meta">#   statistics 内存 size，注意统计信息放在内存中，一旦 server 关机，数据清零</span></div><div class="line">    statistics_zone <span class="number">10</span>m;</div><div class="line"></div><div class="line"><span class="meta">#   负载均衡的服务器列表	</span></div><div class="line">    upstream backend &#123;</div><div class="line"><span class="meta">#       Http 会话保持，支持 insert_cookie， monitor_cookie， session_based   </span></div><div class="line">    	persistence insert_cookie cookie_name=senginxforward timeout=<span class="number">30</span>;</div><div class="line"></div><div class="line"><span class="meta">#	    负载均衡算法，支持 fastest 和 fair;</span></div><div class="line">    	fastest;</div><div class="line"><span class="meta">#       服务器主机，可以用域名（域名支持动态解析）或 ip</span></div><div class="line">        server <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">8087</span> ;</div><div class="line">    	server <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">8085</span> ;</div><div class="line"><span class="meta">#       后端服务器健康度检查    	</span></div><div class="line">	    check interval=<span class="number">1000</span> rise=<span class="number">2</span> fall=<span class="number">5</span> timeout=<span class="number">1000</span> type=tcp;</div><div class="line"><span class="meta">#       配置一个连接发送的请求数，其默认值为 1        </span></div><div class="line"><span class="meta">#       check_keepalive_requests 100;</span></div><div class="line"><span class="meta">#       配置http健康检查包发送的请求内容，为了减少传输数据量，采用"HEAD"方法</span></div><div class="line"><span class="meta">#       当采用长连接进行健康检查时，需在该指令中添加keep-alive请求头，</span></div><div class="line"><span class="meta">#       如："HEAD / HTTP/1.1\r\nConnection: keep-alive\r\n\r\n"</span></div><div class="line">        check_http_send <span class="string">"HEAD / HTTP/1.1\r\nConnection: keep-alive\r\n\r\n"</span>;</div><div class="line"><span class="meta">#       指定 HTTP 回复的健康状态，默认认为 2XX 和 3XX 状态是健康的</span></div><div class="line">        check_http_expect_alive http_2xx http_3xx;	</div><div class="line"></div><div class="line">    &#125;</div><div class="line"><span class="meta">#   定义一个限速 zone 速率是 1 request per second</span></div><div class="line">    limit_req_zone $binary_remote_addr zone=cc:<span class="number">10</span>m rate=<span class="number">1</span>r/s;</div><div class="line">    limit_req_zone $binary_remote_addr zone=total:<span class="number">10</span>m rate=<span class="number">30</span>r/s;    </div><div class="line"><span class="meta">#   define a ip analysis zone，名字为abc 内存大小10M，</span></div><div class="line"><span class="meta">#   在1s采样周期内请求达到10次才计算访问行为</span></div><div class="line">    ip_behavior_zone zone=abc:<span class="number">10</span>m sample_base=<span class="number">10</span> sample_cycle=<span class="number">1</span>s;</div><div class="line"></div><div class="line"><span class="meta">#   定义一个虚拟主机 在 80 端口监听</span></div><div class="line">    server &#123;</div><div class="line">        listen       <span class="number">80</span>;</div><div class="line">        server_name  localhost;</div><div class="line">    #   日志路径    </div><div class="line">    #   access_log  logs/host.access.log  main;</div><div class="line"></div><div class="line"><span class="meta">#	define a unique server virtual server name for statistics</span></div><div class="line">	virtual_server_name www.abc.com;</div><div class="line"><span class="meta">#   开启会话，Cookie 防篡改模块依赖 session</span></div><div class="line">	session on;</div><div class="line">	</div><div class="line"><span class="meta">#   开启防篡改</span></div><div class="line"><span class="meta">#	web_defacement on;  </span></div><div class="line"><span class="meta">#   web_defacement_original /usr/local/senginx/html ;</span></div><div class="line"><span class="meta">#	指定网页文件所在的目录</span></div><div class="line"><span class="meta">#   web_defacement_original /var/www/8087 ;</span></div><div class="line"><span class="meta">#   指定hash文件</span></div><div class="line"><span class="meta">#   web_defacement_hash_data /usr/local/senginx/hash_data;</span></div><div class="line"></div><div class="line"></div><div class="line"><span class="meta">#   turn on a ip analysis zone</span></div><div class="line">	ip_behavior zone=abc type=sensitive_url;</div><div class="line">	</div><div class="line"><span class="meta">#	statistics page </span></div><div class="line">	location /stats &#123;</div><div class="line"> 	    statistics;</div><div class="line"><span class="meta">#       设置页面访问权限</span></div><div class="line">	    allow all;</div><div class="line"><span class="meta">#       allow SOME.IP.ADD.RESS;</span></div><div class="line"><span class="meta">#       deny all;</span></div><div class="line">	&#125;</div><div class="line"></div><div class="line"><span class="meta">#	show session page </span></div><div class="line">	location /show_session &#123;</div><div class="line">	    session_show on;</div><div class="line"><span class="meta">#       设置页面访问权限</span></div><div class="line">	    allow all;</div><div class="line"><span class="meta">#       allow SOME.IP.ADD.RESS;</span></div><div class="line"><span class="meta">#       deny all;</span></div><div class="line">	&#125;</div><div class="line"><span class="meta">#   flush session</span></div><div class="line">	location /blacklist_flush &#123;</div><div class="line">        ip_blacklist_flush;</div><div class="line">   	    ip_blacklist_log on;</div><div class="line"><span class="meta">#       设置页面访问权限</span></div><div class="line">	    allow all;</div><div class="line"><span class="meta">#       allow SOME.IP.ADD.RESS;</span></div><div class="line"><span class="meta">#       deny all;</span></div><div class="line">    &#125;</div><div class="line"></div><div class="line"><span class="meta">#   blacklist page </span></div><div class="line">    location /blacklist_show &#123;</div><div class="line">        ip_blacklist_show;</div><div class="line">   	    ip_blacklist_log on;</div><div class="line"><span class="meta">#       设置页面访问权限</span></div><div class="line">	    allow all;</div><div class="line"><span class="meta">#       allow SOME.IP.ADD.RESS;</span></div><div class="line"><span class="meta">#       deny all;  	    </span></div><div class="line">    &#125;</div><div class="line"></div><div class="line">	location /ss/  &#123;</div><div class="line">        </div><div class="line"><span class="meta">#       if condition == 1, goto @process</span></div><div class="line">	    limit_req zone=cc burst=<span class="number">1</span> forbid_action=@process condition=$cond;   </div><div class="line">        # 限速模块backlog = <span class="number">5</span></div><div class="line">	    limit_req zone=total burst=<span class="number">5</span>;</div><div class="line"></div><div class="line"><span class="meta">#	    root /var/www/8085/ss/;</span></div><div class="line">	    root /<span class="keyword">var</span>/www/<span class="number">8087</span>; </div><div class="line"><span class="meta">#       设置为 sensitive resource</span></div><div class="line">	    ip_behavior_sensitive;</div><div class="line"><span class="meta">#       设置 $cond 条件</span></div><div class="line">        ifall ($insensitive_percent &gt;= <span class="number">0</span>) ($insensitive_percent &lt; <span class="number">30</span>) &#123;</div><div class="line">                 <span class="keyword">set</span> $cond <span class="number">1</span>;</div><div class="line">        &#125;</div><div class="line">	&#125;</div><div class="line">  </div><div class="line">	location @process &#123;</div><div class="line">     	# <span class="keyword">return</span> <span class="number">403</span>;</div><div class="line">        # 机器人模块</div><div class="line">	    robot_mitigation on;</div><div class="line">	    robot_mitigation_cookie_name robotCookie;</div><div class="line">        # js or swf</div><div class="line">	    robot_mitigation_mode js;</div><div class="line">	    # times to change</div><div class="line">	    robot_mitigation_blacklist <span class="number">3</span>;</div><div class="line"></div><div class="line">	    #robot_mitigation_action directive deprecated</div><div class="line">        # robot_mitigation_action block;</div><div class="line">        #  robot_mitigation_whitelist &#123;</div><div class="line">        #       <span class="string">"Google"</span> <span class="string">"Googlebot"</span>;</div><div class="line">        # &#125;</div><div class="line"></div><div class="line"><span class="meta">#       请求转向自定义的服务器列表    </span></div><div class="line">   	    proxy_pass http:<span class="comment">//backend; </span></div><div class="line">	</div><div class="line">    &#125;     </div><div class="line"><span class="meta">#   网页篡改时 recover 目录 </span></div><div class="line">	location /recover &#123;</div><div class="line">               web_defacement off;</div><div class="line">               root /<span class="keyword">var</span>/www;</div><div class="line">    &#125;	</div><div class="line"><span class="meta">#   cookie 防篡改模块 </span></div><div class="line">    location / &#123;</div><div class="line"><span class="meta">#       开启放篡改    </span></div><div class="line">		cookie_poisoning on;</div><div class="line"><span class="meta">#		cookie 篡改时动作，支持 block, pass, remove cookie,add to blacklist</span></div><div class="line">		cookie_poisoning_action block;     </div><div class="line">		#cookie_poisoning_action remove;    <span class="comment">//remove cookie</span></div><div class="line">		#cookie_poisoning_action blacklist,<span class="number">5</span>;    <span class="comment">//block 5 times and put into blacklist	      </span></div><div class="line">		cookie_poisoning_log on;</div><div class="line"></div><div class="line"><span class="meta">#		User-Agent whitelist</span></div><div class="line">		cookie_poisoning_whitelist ua_var_name=ua_wl_dns;                        </div><div class="line"></div><div class="line"><span class="meta">#       限速模块 backlog = 5</span></div><div class="line">	    limit_req zone=total burst=<span class="number">5</span>;</div><div class="line"></div><div class="line"><span class="meta">#       请求转向自定义的服务器列表 	      </span></div><div class="line">	    proxy_pass http:<span class="comment">//backend;</span></div><div class="line"><span class="meta">#       index 页面                </span></div><div class="line">        # index index.html;</div><div class="line">        # root /usr/local/senginx/html;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">        #charset koi8-r;</div><div class="line"></div><div class="line">       # location / &#123;</div><div class="line">        #    root   html;</div><div class="line">         #   index  index.html index.htm;</div><div class="line">       # &#125;</div><div class="line"></div><div class="line">        #error_page  <span class="number">404</span>              /<span class="number">404.</span>html;</div><div class="line"></div><div class="line">        # redirect server error pages to the <span class="keyword">static</span> page /<span class="number">50</span>x.html</div><div class="line"><span class="meta">#       定义错误页面</span></div><div class="line">    error_page   <span class="number">500</span> <span class="number">502</span> <span class="number">503</span> <span class="number">504</span>  /<span class="number">50</span>x.html;</div><div class="line">    location = /<span class="number">50</span>x.html &#123;</div><div class="line">        root   html;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">	location ~ \.html$ &#123;</div><div class="line">		proxy_pass http:<span class="comment">//backend;</span></div><div class="line">		proxy_redirect off; </div><div class="line">	&#125;	</div><div class="line"></div><div class="line"><span class="meta">#   定义健康检查 status page	</span></div><div class="line">	location /status &#123;</div><div class="line">        check_status;</div><div class="line">        access_log   off;</div><div class="line">	    allow all;</div><div class="line"><span class="meta">#       allow SOME.IP.ADD.RESS;</span></div><div class="line"><span class="meta">#       deny all;</span></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a href="http://www.cnblogs.com/edisonchou/p/4126742.html" target="_blank" rel="external">http://www.cnblogs.com/edisonchou/p/4126742.html</a><br><a href="http://www.cnblogs.com/xiaogangqq123/archive/2011/03/02/1969006.html" target="_blank" rel="external">http://www.cnblogs.com/xiaogangqq123/archive/2011/03/02/1969006.html</a><br><a href="http://www.senginx.org/cn/index.php/%E9%A6%96%E9%A1%B5" target="_blank" rel="external">http://www.senginx.org/cn/index.php/%E9%A6%96%E9%A1%B5</a><br>（完）</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_wechat_pay.jpg" alt="sword2g WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_ali_pay.jpg" alt="sword2g Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Nginx/" rel="tag"># Nginx</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/20/GDB-Note/" rel="next" title="GDB-Note">
+                <i class="fa fa-chevron-left"></i> GDB-Note
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/09/01/how-to-install-modsecurity-on-Nginx/" rel="prev" title="Nginx安装Modsecurity">
+                Nginx安装Modsecurity <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/08/26/SEnginx-Reverse-Proxy/"
+           data-title="SEnginx 反向代理搭建测试" data-url="https://github.com/Sword2G/sword2g.github.io/2016/08/26/SEnginx-Reverse-Proxy/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg"
+               alt="sword2g" />
+          <p class="site-author-name" itemprop="name">sword2g</p>
+           
+              <p class="site-description motion-element" itemprop="description">put my notes here</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="http://sword2g.github.io/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/Sword2G" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/2816511392" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.douban.com/people/97199972/" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/birkhoff-lee" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://my.oschina.net/v5871314" title="梦回雪夜观花" target="_blank">梦回雪夜观花</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#正向代理"><span class="nav-number">1.</span> <span class="nav-text">正向代理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#作用"><span class="nav-number">1.1.</span> <span class="nav-text">作用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#加快客户端的请求应答"><span class="nav-number">1.1.1.</span> <span class="nav-text">加快客户端的请求应答</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#减少出口的流量，节约带宽"><span class="nav-number">1.1.2.</span> <span class="nav-text">减少出口的流量，节约带宽</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#访问受限资源"><span class="nav-number">1.1.3.</span> <span class="nav-text">访问受限资源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#隐藏客户端身份"><span class="nav-number">1.1.4.</span> <span class="nav-text">隐藏客户端身份</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#反向代理"><span class="nav-number">2.</span> <span class="nav-text">反向代理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#作用-1"><span class="nav-number">2.1.</span> <span class="nav-text">作用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安全"><span class="nav-number">2.1.1.</span> <span class="nav-text">安全</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缓解目标服务器压力"><span class="nav-number">2.1.2.</span> <span class="nav-text">缓解目标服务器压力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现负载均衡"><span class="nav-number">2.1.3.</span> <span class="nav-text">实现负载均衡</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SEnginx-Security-Enhanced-NGINX"><span class="nav-number">3.</span> <span class="nav-text">SEnginx (Security Enhanced NGINX)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SEnginx-主要功能"><span class="nav-number">3.1.</span> <span class="nav-text">SEnginx 主要功能</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#负载均衡"><span class="nav-number">3.1.1.</span> <span class="nav-text">负载均衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#会话保持"><span class="nav-number">3.1.2.</span> <span class="nav-text">会话保持</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缓存类型设置"><span class="nav-number">3.1.3.</span> <span class="nav-text">缓存类型设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务器健康检查"><span class="nav-number">3.1.4.</span> <span class="nav-text">服务器健康检查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#访问行为识别"><span class="nav-number">3.1.5.</span> <span class="nav-text">访问行为识别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于条件的限速功能"><span class="nav-number">3.1.6.</span> <span class="nav-text">基于条件的限速功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Robot-Mitigation（机器人缓解）"><span class="nav-number">3.1.7.</span> <span class="nav-text">Robot Mitigation（机器人缓解）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#黑白名单"><span class="nav-number">3.1.8.</span> <span class="nav-text">黑白名单</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#带DNS反查的User-Agent白名单"><span class="nav-number">3.1.9.</span> <span class="nav-text">带DNS反查的User-Agent白名单</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Cookie-防篡改"><span class="nav-number">3.1.10.</span> <span class="nav-text">Cookie 防篡改</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#网页防篡改"><span class="nav-number">3.1.11.</span> <span class="nav-text">网页防篡改</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安全会话机制"><span class="nav-number">3.1.12.</span> <span class="nav-text">安全会话机制</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SEnginx-配置示例"><span class="nav-number">4.</span> <span class="nav-text">SEnginx 配置示例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#实现环境"><span class="nav-number">4.1.</span> <span class="nav-text">实现环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置文件"><span class="nav-number">4.2.</span> <span class="nav-text">配置文件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考链接"><span class="nav-number">5.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div align="center" class="powered-by">
+
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a> 
+  and Themed by -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist</a>
+
+
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sword2g</span>
+  
+</div>
+
+
+
+
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sword2g"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

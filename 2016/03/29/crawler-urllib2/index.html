@@ -1,0 +1,870 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="crawler," />
+
+
+
+
+
+  <link rel="alternate" href="http://sword2g.github.io/atom.xml" title="No root,no fruit" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="利用Python urllib、urllib2，实现简单爬虫。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python爬虫之urllib2笔记">
+<meta property="og:url" content="https://github.com/Sword2G/sword2g.github.io/2016/03/29/crawler-urllib2/index.html">
+<meta property="og:site_name" content="No root,no fruit">
+<meta property="og:description" content="利用Python urllib、urllib2，实现简单爬虫。">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/hexo-crawler-urllib2-post.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/hexo-crawler-urllib2-get.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/hexo-crawler-urllib2-requestobjs.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/hexo-crawler-urllib2-method.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/hexo-crawler-urllib2-response.jpg">
+<meta property="og:updated_time" content="2017-03-03T15:16:00.496Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python爬虫之urllib2笔记">
+<meta name="twitter:description" content="利用Python urllib、urllib2，实现简单爬虫。">
+<meta name="twitter:image" content="http://7xum8m.com1.z0.glb.clouddn.com/hexo-crawler-urllib2-post.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/Sword2G/sword2g.github.io/2016/03/29/crawler-urllib2/"/>
+
+
+
+
+
+  <title> Python爬虫之urllib2笔记 | No root,no fruit </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">No root,no fruit</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">just do it！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/resume.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://github.com/Sword2G/sword2g.github.io/2016/03/29/crawler-urllib2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sword2g">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="No root,no fruit">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Python爬虫之urllib2笔记
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-29T10:07:55+08:00">
+                2016-03-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/03/29/crawler-urllib2/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/03/29/crawler-urllib2/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>利用Python urllib、urllib2，实现简单爬虫。</p>
+<a id="more"></a>
+<h1 id="简单示例"><a href="#简单示例" class="headerlink" title="简单示例"></a>简单示例</h1><p>利用Python的urllib2库，可以很方便的完成网页抓取功能，下面五行代码实现百度主页抓取及打印。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># -*- coding: utf-8 -*-</span></div><div class="line"><span class="keyword">import</span> urllib</div><div class="line"><span class="keyword">import</span> urllib2</div><div class="line"> </div><div class="line">response = urllib2.urlopen(<span class="string">"http://www.baidu.com"</span>)</div><div class="line"><span class="keyword">print</span> response.read()</div></pre></td></tr></table></figure>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><p> urllib2.urlopen()函数的原型为<br> <em>urllib2.urlopen(url[, data[, timeout[, cafile[, capath[, cadefault[, context]]]]])<br>Open the URL url, which can be either a string or a Request object.</em></p>
+<p>1 timeout参数用于设置超时时间（以秒为单位）；<br>2 data参数用于即为待提交的参数，需要用urllib.urlencode()函数进行编码；<br>3 url参数即为请求的url字符串或者Request对象。</p>
+<h1 id="提交数据"><a href="#提交数据" class="headerlink" title="提交数据"></a>提交数据</h1><h2 id="POST请求"><a href="#POST请求" class="headerlink" title="POST请求"></a>POST请求</h2><p>POST进行表单的提交，提交的数据为key-value键值对。</p>
+<h3 id="POST示例"><a href="#POST示例" class="headerlink" title="POST示例"></a>POST示例</h3><figure class="highlight arduino"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"># -*- coding: utf<span class="number">-8</span> -*-</div><div class="line"><span class="keyword">import</span> urllib</div><div class="line"><span class="keyword">import</span> urllib2</div><div class="line"> </div><div class="line">url = <span class="string">'http://httpbin.org/post'</span></div><div class="line">post_data = &#123;<span class="string">'key1'</span>:<span class="string">'value1'</span>, <span class="string">'key2'</span>:<span class="string">'value2'</span>&#125;</div><div class="line">formal_post_data = urllib.urlencode(post_data)</div><div class="line"> </div><div class="line">response = urllib2.urlopen(url,formal_post_data)</div><div class="line"> </div><div class="line"><span class="built_in">print</span> response.<span class="built_in">read</span>()</div></pre></td></tr></table></figure>
+<h3 id="运行结果"><a href="#运行结果" class="headerlink" title="运行结果"></a>运行结果</h3><p><img src="http://7xum8m.com1.z0.glb.clouddn.com/hexo-crawler-urllib2-post.jpg" alt="post"></p>
+<h2 id="GET请求"><a href="#GET请求" class="headerlink" title="GET请求"></a>GET请求</h2><p>GET请求的参数是附加在url的后面，用”?”隔开</p>
+<h3 id="GET示例"><a href="#GET示例" class="headerlink" title="GET示例"></a>GET示例</h3><figure class="highlight arduino"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"># -*- coding: utf<span class="number">-8</span> -*-</div><div class="line"><span class="keyword">import</span> urllib</div><div class="line"><span class="keyword">import</span> urllib2</div><div class="line"> </div><div class="line">get_data = &#123;<span class="string">'key1'</span>:<span class="string">'value1'</span>, <span class="string">'key2'</span>:<span class="string">'value2'</span>&#125;</div><div class="line">formal_get_data = urllib.urlencode(get_data)</div><div class="line"> </div><div class="line">url = <span class="string">'http://httpbin.org/get'</span> + <span class="string">'?'</span> + formal_get_data   </div><div class="line">response = urllib2.urlopen(url)</div><div class="line"> </div><div class="line"><span class="built_in">print</span> response.<span class="built_in">read</span>()</div></pre></td></tr></table></figure>
+<h3 id="运行结果-1"><a href="#运行结果-1" class="headerlink" title="运行结果"></a>运行结果</h3><p><img src="http://7xum8m.com1.z0.glb.clouddn.com/hexo-crawler-urllib2-get.jpg" alt="get"></p>
+<h1 id="Request对象"><a href="#Request对象" class="headerlink" title="Request对象"></a>Request对象</h1><p>注意 urllib2.urlopen（）函数的第一个参数也可以是Request对象，Request对象的引入将更加方便的封装数据</p>
+<h2 id="原型"><a href="#原型" class="headerlink" title="原型"></a>原型</h2><p><em>urllib2.Request(url[, data][, headers][, origin_req_host][, unverifiable])</em></p>
+<h3 id="Request示例"><a href="#Request示例" class="headerlink" title="Request示例"></a>Request示例</h3><figure class="highlight gams"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"># -*- coding: utf<span class="number">-8</span> -*-</div><div class="line">import urllib</div><div class="line">import urllib2</div><div class="line"> </div><div class="line">url = <span class="string">'http://httpbin.org/post'</span></div><div class="line"> </div><div class="line">post_data = &#123;<span class="string">'key1'</span>:<span class="string">'value1'</span>, <span class="string">'key2'</span>:<span class="string">'value2'</span>&#125;</div><div class="line">formal_post_data = urllib.urlencode(post_data)</div><div class="line"> </div><div class="line">#<span class="keyword">set</span> headers</div><div class="line">headers <span class="comment">= &#123;</span><span class="comment">'User-Agent'</span><span class="comment"> :</span> <span class="comment">'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'</span><span class="comment">&#125;</span></div><div class="line"> </div><div class="line">request <span class="comment">= urllib2.Request(url, formal_post_data, headers)</span></div><div class="line"> </div><div class="line">response <span class="comment">= urllib2.urlopen(request)</span></div><div class="line">      </div><div class="line">#supposed <span class="comment">it is encoded in utf-8</span></div><div class="line">content <span class="comment">= response.read().decode(</span><span class="comment">'utf-8'</span><span class="comment">)</span></div><div class="line"></div><div class="line">print <span class="comment">content</span></div></pre></td></tr></table></figure>
+<h3 id="运行结果-2"><a href="#运行结果-2" class="headerlink" title="运行结果"></a>运行结果</h3><p><img src="http://7xum8m.com1.z0.glb.clouddn.com/hexo-crawler-urllib2-requestobjs.jpg" alt=""></p>
+<h2 id="Request的有关函数"><a href="#Request的有关函数" class="headerlink" title="Request的有关函数"></a>Request的有关函数</h2><p>获得Request的元数据</p>
+<h3 id="有关函数示例"><a href="#有关函数示例" class="headerlink" title="有关函数示例"></a>有关函数示例</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># -*- coding: utf-8 -*-</span></div><div class="line"><span class="keyword">import</span> urllib</div><div class="line"><span class="keyword">import</span> urllib2</div><div class="line"> </div><div class="line">url = <span class="string">'http://httpbin.org/post'</span></div><div class="line"> </div><div class="line">post_data = &#123;<span class="string">'key1'</span>:<span class="string">'value1'</span>, <span class="string">'key2'</span>:<span class="string">'value2'</span>&#125;</div><div class="line">formal_post_data = urllib.urlencode(post_data)</div><div class="line"> </div><div class="line"><span class="comment">#set headers</span></div><div class="line">headers = &#123;<span class="string">'User-Agent'</span> : <span class="string">'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'</span>&#125;</div><div class="line"> </div><div class="line">request = urllib2.Request(url, formal_post_data, headers)</div><div class="line"> </div><div class="line"><span class="keyword">print</span> <span class="string">u'返回请求的方法post/GET'</span></div><div class="line">method = request.get_method()</div><div class="line"><span class="keyword">print</span> <span class="string">'get_method===&gt;'</span> + method</div><div class="line"><span class="keyword">print</span> <span class="string">u'返回提交的数据'</span></div><div class="line">data = request.get_data()</div><div class="line"><span class="keyword">print</span> <span class="string">'request.get_data()===&gt;'</span>,data</div><div class="line"> </div><div class="line"><span class="keyword">print</span> <span class="string">u'返回参数中的url'</span></div><div class="line">full_url = request.get_full_url()</div><div class="line"><span class="keyword">print</span> <span class="string">'request.get_full_url()===&gt;'</span>,full_url</div><div class="line"> </div><div class="line"><span class="keyword">print</span> <span class="string">u'返回请求的schema'</span></div><div class="line">request_type = request.get_type()</div><div class="line"><span class="keyword">print</span> <span class="string">'request.get_type()===&gt;'</span>,request_type</div><div class="line"> </div><div class="line"><span class="keyword">print</span> <span class="string">u'返回请求的主机'</span></div><div class="line">host = request.get_host()</div><div class="line"><span class="keyword">print</span> <span class="string">'request.get_host()===&gt;'</span>,host</div><div class="line"> </div><div class="line"><span class="keyword">print</span> <span class="string">u'返回选择器 - URL 中发送到服务器中的部分'</span></div><div class="line">selector = request.get_selector()</div><div class="line"><span class="keyword">print</span> <span class="string">'request.get_selector()===&gt;'</span>,selector</div><div class="line"> </div><div class="line"> </div><div class="line"><span class="keyword">print</span> <span class="string">u'返回选择器请求头部'</span></div><div class="line">header_items = request.header_items()</div><div class="line"><span class="keyword">print</span> <span class="string">'request.header_items()===&gt;'</span>,header_items</div><div class="line"> </div><div class="line"><span class="comment">##get_header(header_name, default=None) 获得指定的header</span></div><div class="line"><span class="comment">## Request.add_header(key, val)可添加头部</span></div><div class="line"><span class="comment">## Request.has_header(header) 检查是否实例拥有参数中的头</span></div><div class="line"><span class="comment">## Request.has_data() 检查是否含有POST数据</span></div></pre></td></tr></table></figure>
+<h3 id="运行结果-3"><a href="#运行结果-3" class="headerlink" title="运行结果"></a>运行结果</h3><p><img src="http://7xum8m.com1.z0.glb.clouddn.com/hexo-crawler-urllib2-method.jpg" alt="request"></p>
+<h1 id="Response对象"><a href="#Response对象" class="headerlink" title="Response对象"></a>Response对象</h1><h2 id="Response有关方法"><a href="#Response有关方法" class="headerlink" title="Response有关方法"></a>Response有关方法</h2><p>urllib2.urlopen（）函数返回的response对象有以下方法 </p>
+<ul>
+<li><p>geturl() — 返回所获取资源的URL,通常用于决定是否跟着一个重定向；</p>
+</li>
+<li><p>info() — 返回页面的元信息，例如头部信息，信息以 mimetools.表单的形式显现；   </p>
+</li>
+<li><p>getcode() — 返回响应的HTTP状态码。  </p>
+</li>
+</ul>
+<h2 id="有关方法示例"><a href="#有关方法示例" class="headerlink" title="有关方法示例"></a>有关方法示例</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># -*- coding: utf-8 -*-</span></div><div class="line"><span class="keyword">import</span> urllib</div><div class="line"><span class="keyword">import</span> urllib2</div><div class="line"> </div><div class="line">url = <span class="string">'http://httpbin.org/post'</span></div><div class="line"> </div><div class="line">post_data = &#123;<span class="string">'key1'</span>:<span class="string">'value1'</span>, <span class="string">'key2'</span>:<span class="string">'value2'</span>&#125;</div><div class="line">formal_post_data = urllib.urlencode(post_data)</div><div class="line"> </div><div class="line"><span class="comment">#set headers</span></div><div class="line">headers = &#123;<span class="string">'User-Agent'</span> : <span class="string">'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'</span>&#125;</div><div class="line"> </div><div class="line">request = urllib2.Request(url, formal_post_data, headers)</div><div class="line"> </div><div class="line">response = urllib2.urlopen(request)</div><div class="line"> </div><div class="line"><span class="keyword">print</span> <span class="string">u'获得真实url（重定向后的url）'</span></div><div class="line"><span class="keyword">print</span> response.geturl()</div><div class="line"><span class="keyword">print</span> <span class="string">u'获得返回状态码'</span></div><div class="line"><span class="keyword">print</span> response.code</div><div class="line"><span class="keyword">print</span> <span class="string">u'页面的元信息'</span></div><div class="line"><span class="keyword">print</span> response.info()</div></pre></td></tr></table></figure>
+<h2 id="运行结果-4"><a href="#运行结果-4" class="headerlink" title="运行结果"></a>运行结果</h2><p><img src="http://7xum8m.com1.z0.glb.clouddn.com/hexo-crawler-urllib2-response.jpg" alt=""></p>
+<h1 id="常用代码"><a href="#常用代码" class="headerlink" title="常用代码"></a>常用代码</h1><figure class="highlight gams"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"># -*- coding: utf<span class="number">-8</span> -*-</div><div class="line">import urllib</div><div class="line">import urllib2</div><div class="line"> </div><div class="line">url = <span class="string">'http://httpbin.org/post'</span></div><div class="line"> </div><div class="line">post_data = &#123;<span class="string">'key1'</span>:<span class="string">'value1'</span>, <span class="string">'key2'</span>:<span class="string">'value2'</span>&#125;</div><div class="line">formal_post_data = urllib.urlencode(post_data)</div><div class="line"> </div><div class="line">#<span class="keyword">set</span> headers</div><div class="line">headers <span class="comment">= &#123;</span><span class="comment">'User-Agent'</span><span class="comment"> :</span> <span class="comment">'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'</span><span class="comment">&#125;</span></div><div class="line"> </div><div class="line">request <span class="comment">= urllib2.Request(url, formal_post_data, headers)</span></div><div class="line"> </div><div class="line">response <span class="comment">= urllib2.urlopen(request)</span></div><div class="line"> </div><div class="line">#supposed <span class="comment">it is encoded in utf-8</span></div><div class="line">content <span class="comment">= response.read().decode(</span><span class="comment">'utf-8'</span><span class="comment">)</span></div><div class="line"> </div><div class="line">print <span class="comment">content</span></div></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_wechat_pay.jpg" alt="sword2g WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_ali_pay.jpg" alt="sword2g Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/crawler/" rel="tag"># crawler</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/22/create-daemon-in-linux/" rel="next" title="Linux中创建守护进程">
+                <i class="fa fa-chevron-left"></i> Linux中创建守护进程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/07/git-note/" rel="prev" title="ProGit Note">
+                ProGit Note <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/03/29/crawler-urllib2/"
+           data-title="Python爬虫之urllib2笔记" data-url="https://github.com/Sword2G/sword2g.github.io/2016/03/29/crawler-urllib2/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg"
+               alt="sword2g" />
+          <p class="site-author-name" itemprop="name">sword2g</p>
+           
+              <p class="site-description motion-element" itemprop="description">put my notes here</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="http://sword2g.github.io/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/Sword2G" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/2816511392" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.douban.com/people/97199972/" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/birkhoff-lee" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://my.oschina.net/v5871314" title="梦回雪夜观花" target="_blank">梦回雪夜观花</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#简单示例"><span class="nav-number">1.</span> <span class="nav-text">简单示例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#代码分析"><span class="nav-number">1.1.</span> <span class="nav-text">代码分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#提交数据"><span class="nav-number">2.</span> <span class="nav-text">提交数据</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#POST请求"><span class="nav-number">2.1.</span> <span class="nav-text">POST请求</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#POST示例"><span class="nav-number">2.1.1.</span> <span class="nav-text">POST示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行结果"><span class="nav-number">2.1.2.</span> <span class="nav-text">运行结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GET请求"><span class="nav-number">2.2.</span> <span class="nav-text">GET请求</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#GET示例"><span class="nav-number">2.2.1.</span> <span class="nav-text">GET示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行结果-1"><span class="nav-number">2.2.2.</span> <span class="nav-text">运行结果</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Request对象"><span class="nav-number">3.</span> <span class="nav-text">Request对象</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#原型"><span class="nav-number">3.1.</span> <span class="nav-text">原型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Request示例"><span class="nav-number">3.1.1.</span> <span class="nav-text">Request示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行结果-2"><span class="nav-number">3.1.2.</span> <span class="nav-text">运行结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Request的有关函数"><span class="nav-number">3.2.</span> <span class="nav-text">Request的有关函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#有关函数示例"><span class="nav-number">3.2.1.</span> <span class="nav-text">有关函数示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行结果-3"><span class="nav-number">3.2.2.</span> <span class="nav-text">运行结果</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Response对象"><span class="nav-number">4.</span> <span class="nav-text">Response对象</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Response有关方法"><span class="nav-number">4.1.</span> <span class="nav-text">Response有关方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#有关方法示例"><span class="nav-number">4.2.</span> <span class="nav-text">有关方法示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#运行结果-4"><span class="nav-number">4.3.</span> <span class="nav-text">运行结果</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#常用代码"><span class="nav-number">5.</span> <span class="nav-text">常用代码</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div align="center" class="powered-by">
+
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a> 
+  and Themed by -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist</a>
+
+
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sword2g</span>
+  
+</div>
+
+
+
+
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sword2g"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

@@ -1,0 +1,836 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+  <link rel="alternate" href="http://sword2g.github.io/atom.xml" title="No root,no fruit" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="sizeof在计算结构体大小的时候并不是简单的将成员变量相加，计算时还需要考虑内存字节对齐的问题。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Struct 结构与内存对齐">
+<meta property="og:url" content="https://github.com/Sword2G/sword2g.github.io/2016/07/06/byte-align/index.html">
+<meta property="og:site_name" content="No root,no fruit">
+<meta property="og:description" content="sizeof在计算结构体大小的时候并不是简单的将成员变量相加，计算时还需要考虑内存字节对齐的问题。">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/align_%E5%AF%B9%E9%BD%90.png">
+<meta property="og:updated_time" content="2016-12-27T14:30:21.656Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Struct 结构与内存对齐">
+<meta name="twitter:description" content="sizeof在计算结构体大小的时候并不是简单的将成员变量相加，计算时还需要考虑内存字节对齐的问题。">
+<meta name="twitter:image" content="http://7xum8m.com1.z0.glb.clouddn.com/align_%E5%AF%B9%E9%BD%90.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/Sword2G/sword2g.github.io/2016/07/06/byte-align/"/>
+
+
+
+
+
+  <title> Struct 结构与内存对齐 | No root,no fruit </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">No root,no fruit</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">just do it！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/resume.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://github.com/Sword2G/sword2g.github.io/2016/07/06/byte-align/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sword2g">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="No root,no fruit">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Struct 结构与内存对齐
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-07-06T22:19:59+08:00">
+                2016-07-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/07/06/byte-align/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/06/byte-align/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>sizeof在计算结构体大小的时候并不是简单的将成员变量相加，计算时还需要考虑内存字节对齐的问题。<br><a id="more"></a></p>
+<h1 id="字节对齐原因"><a href="#字节对齐原因" class="headerlink" title="字节对齐原因"></a>字节对齐原因</h1><p>1、平台原因(移植原因)：不是所有的硬件平台都能访问任意地址上的任意数据的；某些硬件平台只能在某些地址处取某些特定类型的数据，否则抛出硬件异常。</p>
+<p>2、性能原因(空间换取时间)：数据结构(尤其是栈)应该尽可能地在自然边界上对齐。原因在于，为了访问未对齐的内存，处理器需要作两次内存访问；而对齐的内存访问仅需要一次访问<br>关于对齐的原因参考：<a href="http://www.ibm.com/developerworks/library/pa-dalign/" target="_blank" rel="external">Data alignment: Straighten up and fly right</a></p>
+<h1 id="内存不对齐后果"><a href="#内存不对齐后果" class="headerlink" title="内存不对齐后果"></a>内存不对齐后果</h1><blockquote>
+<p>If you don’t understand and address alignment issues in your software, the following scenarios, in increasing order of severity, are all possible:</p>
+<pre><code>* Your software will run slower.
+* Your application will lock up.
+* Your operating system will crash.
+* Your software will silently fail, yielding incorrect results.
+</code></pre></blockquote>
+<h1 id="字节对齐的规则"><a href="#字节对齐的规则" class="headerlink" title="字节对齐的规则"></a>字节对齐的规则</h1><p>内存字节对齐的具体规则是由编译器决定的，不同的编译环境，内存对齐的方式略有不同。<br>总的来说，内存对齐分两个方面。（都要与#pragma pack(n)中的 n 作比较，都不能大于 n）</p>
+<h2 id="成员首地址对齐"><a href="#成员首地址对齐" class="headerlink" title="成员首地址对齐"></a>成员首地址对齐</h2><p>结构体每个成员存放首地址相对结构体首地址的偏移量是(最终)自身对齐参数的整数倍。<br>(最终)自身对齐参数 = min( 自身对齐参数，#pragma pack(n) )<br><img src="http://7xum8m.com1.z0.glb.clouddn.com/align_%E5%AF%B9%E9%BD%90.png" alt="对齐参数表"></p>
+<p>在 windows(32)/VC6.0 下各种类型的变量的自身对齐参数就是该类型变量所占字节数的大小，而在 linux(32)/GCC 下 double 类型的变量自身对齐参数是 4 ，是因为 linux(32)/GCC 下如果该类型变量的长度没有超过 CPU 的字长，则以该类型变量的长度作为自身对齐参数，如果该类型变量的长度超过 CPU 字长，则自身对齐参数为 CPU 字长，而 32 位系统其 CPU 字长是 4，所以linux(32)/GCC 下 double 类型的变量自身对齐参数是 4。</p>
+<h2 id="结构体所占空间对齐"><a href="#结构体所占空间对齐" class="headerlink" title="结构体所占空间对齐"></a>结构体所占空间对齐</h2><p>整个结构体变量所占空间的大小是（整体）对齐参数大小的整数倍。<br>（整体）对齐参数 = min( max( 所有成员(最终)自身对齐参数）, #pragma pack(n) )</p>
+<h1 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h1><p>计算步骤：</p>
+<ul>
+<li>是否有#pragma pack(n)<br>没有==&gt; 首地址自身对齐，整个结构按最大成员对齐<br>有====&gt; 首地址自身对齐,整个结构大小对齐都要考虑 n 的大小</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//没有设置#pragma pack进行对齐时</span></div><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">st1</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">int</span> a; <span class="comment">// 4</span></div><div class="line">    <span class="keyword">char</span> b; <span class="comment">//1 + 1(填充供下一个short两字节对齐)</span></div><div class="line">    short c; <span class="comment">// 2</span></div><div class="line">&#125;;</div><div class="line"><span class="comment">// 4 + 2 + 2 = 8 (已经两字节对齐)</span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">st2</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">char</span> a; <span class="comment">// 1 + 3(填充供下一个int 四字节对齐)</span></div><div class="line">    <span class="keyword">int</span> b; <span class="comment">// 4</span></div><div class="line">    short c; <span class="comment">// 2</span></div><div class="line">&#125;;</div><div class="line"><span class="comment">// 4 + 4 + 2 = 10(不满足4字节对齐)+ 2 = 12</span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">st3</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">int</span> a; <span class="comment">//4</span></div><div class="line">    short b;<span class="comment">// 2</span></div><div class="line">    <span class="keyword">static</span> <span class="keyword">int</span> c; <span class="comment">//静态不在结构中占空间</span></div><div class="line">&#125;;</div><div class="line"><span class="comment">// 4 + 2 = 6(不满足4字节对齐)+2 = 8</span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">st4</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">bool</span> a; <span class="comment">//1 + 3(供struct st1对齐，struct st14字节对齐，成员中最大的自身对齐参数)</span></div><div class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">st1</span></span> s; <span class="comment">// 8</span></div><div class="line">    short b;<span class="comment">//2</span></div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="comment">//4 + 8 + 2 = 14(不满足4字节对齐)+ 2 = 16</span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">st5</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">bool</span> a; <span class="comment">//1 + 3(供struct st1对齐，struct st1 4字节对齐，成员中最大的自身对齐参数)</span></div><div class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">st1</span></span> s;<span class="comment">// 8 + 4 (填充供下一个double 8字节对齐)</span></div><div class="line">    double b; <span class="comment">// 8</span></div><div class="line">    <span class="keyword">int</span> c;<span class="comment">//4</span></div><div class="line">&#125;;</div><div class="line"><span class="comment">//4 + 12 + 8 + 4 = 28(不满足8字节对齐) + 4 = 32</span></div></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">pragma</span> pack(2)  </span></div><div class="line"></div><div class="line"><span class="keyword">struct</span> st1</div><div class="line">&#123;</div><div class="line">    <span class="keyword">int</span> a; <span class="comment">// 4</span></div><div class="line">    <span class="keyword">char</span> b; <span class="comment">//1 + 1(填充供下一个int 2字节对齐)</span></div><div class="line">    <span class="keyword">short</span> c; <span class="comment">// 2</span></div><div class="line">&#125;;</div><div class="line"><span class="comment">// 4 + 1 + 2 = 8 (已经满足1字节对齐)</span></div><div class="line"></div><div class="line"><span class="keyword">struct</span> st2</div><div class="line">&#123;</div><div class="line">    <span class="keyword">char</span> a; <span class="comment">// 1 + 1(填充供下一个int 2字节对齐)</span></div><div class="line">    <span class="keyword">int</span> b; <span class="comment">// 4</span></div><div class="line">    <span class="keyword">short</span> c; <span class="comment">// 2</span></div><div class="line">&#125;;</div><div class="line"><span class="comment">// 2 + 4 + 2 = 8(已经满足2字节对齐)</span></div><div class="line"></div><div class="line"><span class="keyword">struct</span> st3</div><div class="line">&#123;</div><div class="line">    <span class="keyword">int</span> a; <span class="comment">//4</span></div><div class="line">    <span class="keyword">short</span> b;<span class="comment">// 2</span></div><div class="line">    <span class="keyword">static</span> <span class="keyword">int</span> c; <span class="comment">//静态不在结构中占空间</span></div><div class="line">&#125;;</div><div class="line"><span class="comment">// 4 + 2 = 6(满足2字节对齐)</span></div><div class="line"></div><div class="line"><span class="keyword">struct</span> st4</div><div class="line">&#123;</div><div class="line">    <span class="keyword">bool</span> a; <span class="comment">//1 + 1(供struct st1 2 )</span></div><div class="line">    <span class="keyword">struct</span> st1 s; <span class="comment">// 8</span></div><div class="line">    <span class="keyword">short</span> b;<span class="comment">//2</span></div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="comment">//2 + 8 + 2 = 12(满足2字节对齐)</span></div><div class="line"></div><div class="line"><span class="keyword">struct</span> st5</div><div class="line">&#123;</div><div class="line">    <span class="keyword">bool</span> a; <span class="comment">//1 + 1(供struct st1 2 字节对齐)</span></div><div class="line">    <span class="keyword">struct</span> st1 s;<span class="comment">// 8 </span></div><div class="line">    <span class="keyword">double</span> b; <span class="comment">// 8</span></div><div class="line">    <span class="keyword">int</span> c;<span class="comment">//4</span></div><div class="line">&#125;;</div><div class="line"><span class="comment">//2 + 8 + 8 + 4 = 22(满足2字节对齐)</span></div></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">pragma</span> pack(4)  </span></div><div class="line"></div><div class="line"><span class="keyword">struct</span> st1</div><div class="line">&#123;</div><div class="line">    <span class="keyword">int</span> a; <span class="comment">// 4</span></div><div class="line">    <span class="keyword">char</span> b; <span class="comment">//1 + 1(填充供下一个int 2字节对齐)</span></div><div class="line">    <span class="keyword">short</span> c; <span class="comment">// 2</span></div><div class="line">&#125;;</div><div class="line"><span class="comment">// 4 + 1 + 2 = 8 (已经满足4字节对齐)</span></div><div class="line"></div><div class="line"><span class="keyword">struct</span> st2</div><div class="line">&#123;</div><div class="line">    <span class="keyword">char</span> a; <span class="comment">// 1 + 3(填充供下一个int 4字节对齐)</span></div><div class="line">    <span class="keyword">int</span> b; <span class="comment">// 4</span></div><div class="line">    <span class="keyword">short</span> c; <span class="comment">// 2</span></div><div class="line">&#125;;</div><div class="line"><span class="comment">// 4 + 4 + 2 = 8(不满足4字节对齐) + 4 = 12</span></div><div class="line"></div><div class="line"><span class="keyword">struct</span> st3</div><div class="line">&#123;</div><div class="line">    <span class="keyword">int</span> a; <span class="comment">//4</span></div><div class="line">    <span class="keyword">short</span> b;<span class="comment">// 2</span></div><div class="line">    <span class="keyword">static</span> <span class="keyword">int</span> c; <span class="comment">//静态不在结构中占空间</span></div><div class="line">&#125;;</div><div class="line"><span class="comment">// 4 + 2 = 6(不满足4字节对齐) + 2 = 8</span></div><div class="line"></div><div class="line"><span class="keyword">struct</span> st4</div><div class="line">&#123;</div><div class="line">    <span class="keyword">bool</span> a; <span class="comment">//1 + 3(供struct st1对齐，struct st1 4字节对齐，成员中最大的自身对齐参数)</span></div><div class="line">    <span class="keyword">struct</span> st1 s; <span class="comment">// 8</span></div><div class="line">    <span class="keyword">short</span> b;<span class="comment">//2</span></div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="comment">//4 + 8 + 2 = 14(满足4字节对齐) + 2 = 16</span></div><div class="line"></div><div class="line"><span class="keyword">struct</span> st5</div><div class="line">&#123;</div><div class="line">    <span class="keyword">bool</span> a; <span class="comment">//1 + 3(填充,供struct st1对齐，struct st1 4字节对齐，成员中最大的自身对齐参数)</span></div><div class="line">    <span class="keyword">struct</span> st1 s;<span class="comment">// 8 (满足double 4 字节对齐)</span></div><div class="line">    <span class="keyword">double</span> b; <span class="comment">// 8</span></div><div class="line">    <span class="keyword">int</span> c;<span class="comment">//4</span></div><div class="line">&#125;;</div><div class="line"><span class="comment">//4 + 8 + 8 + 4 = 24(满足4字节对齐)</span></div></pre></td></tr></table></figure>
+<h1 id="特殊的sizeof"><a href="#特殊的sizeof" class="headerlink" title="特殊的sizeof"></a>特殊的sizeof</h1><ul>
+<li>sizeof(void) gcc=1/vc 6.0编译不通过</li>
+<li>sizeof(void *) 指针的大小</li>
+<li>传字符数组到函数 sizeof,字符数组退化成指针 结果为指针大小</li>
+<li>sizeof(空类) = 1</li>
+<li>sizeof(类中有虚函数) 加上虚指针</li>
+</ul>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a href="http://www.cnblogs.com/dolphin0520/archive/2011/09/17/2179466.html" target="_blank" rel="external">http://www.cnblogs.com/dolphin0520/archive/2011/09/17/2179466.html</a><br><a href="http://www.ibm.com/developerworks/library/pa-dalign/" target="_blank" rel="external">http://www.ibm.com/developerworks/library/pa-dalign/</a><br>（完）</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_wechat_pay.jpg" alt="sword2g WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_ali_pay.jpg" alt="sword2g Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/06/21/HTTPie/" rel="next" title="HTTPie">
+                <i class="fa fa-chevron-left"></i> HTTPie
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/11/build-lib/" rel="prev" title="Linux 下静/动态链接库的使用">
+                Linux 下静/动态链接库的使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/07/06/byte-align/"
+           data-title="Struct 结构与内存对齐" data-url="https://github.com/Sword2G/sword2g.github.io/2016/07/06/byte-align/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg"
+               alt="sword2g" />
+          <p class="site-author-name" itemprop="name">sword2g</p>
+           
+              <p class="site-description motion-element" itemprop="description">put my notes here</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="http://sword2g.github.io/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/Sword2G" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/2816511392" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.douban.com/people/97199972/" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/birkhoff-lee" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://my.oschina.net/v5871314" title="梦回雪夜观花" target="_blank">梦回雪夜观花</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#字节对齐原因"><span class="nav-number">1.</span> <span class="nav-text">字节对齐原因</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#内存不对齐后果"><span class="nav-number">2.</span> <span class="nav-text">内存不对齐后果</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#字节对齐的规则"><span class="nav-number">3.</span> <span class="nav-text">字节对齐的规则</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#成员首地址对齐"><span class="nav-number">3.1.</span> <span class="nav-text">成员首地址对齐</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结构体所占空间对齐"><span class="nav-number">3.2.</span> <span class="nav-text">结构体所占空间对齐</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#示例"><span class="nav-number">4.</span> <span class="nav-text">示例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#特殊的sizeof"><span class="nav-number">5.</span> <span class="nav-text">特殊的sizeof</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考链接"><span class="nav-number">6.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div align="center" class="powered-by">
+
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a> 
+  and Themed by -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist</a>
+
+
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sword2g</span>
+  
+</div>
+
+
+
+
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sword2g"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

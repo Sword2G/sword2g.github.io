@@ -1,0 +1,925 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Modsecurity," />
+
+
+
+
+
+  <link rel="alternate" href="http://sword2g.github.io/atom.xml" title="No root,no fruit" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="WAF（Web Application Firewall）,Web 应用防火墙是通过执行一系列针对 HTTP/HTTPS 的安全策略来专门为 Web 应用提供保护的一款产品。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WAF 之 Modsecurity">
+<meta property="og:url" content="https://github.com/Sword2G/sword2g.github.io/2016/06/20/WAF-Modsecurity/index.html">
+<meta property="og:site_name" content="No root,no fruit">
+<meta property="og:description" content="WAF（Web Application Firewall）,Web 应用防火墙是通过执行一系列针对 HTTP/HTTPS 的安全策略来专门为 Web 应用提供保护的一款产品。">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/ModSecuritysql.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/ModSecurityphp.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/ModSecuritynull.jpg">
+<meta property="og:updated_time" content="2017-03-06T11:41:07.868Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="WAF 之 Modsecurity">
+<meta name="twitter:description" content="WAF（Web Application Firewall）,Web 应用防火墙是通过执行一系列针对 HTTP/HTTPS 的安全策略来专门为 Web 应用提供保护的一款产品。">
+<meta name="twitter:image" content="http://7xum8m.com1.z0.glb.clouddn.com/ModSecuritysql.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/Sword2G/sword2g.github.io/2016/06/20/WAF-Modsecurity/"/>
+
+
+
+
+
+  <title> WAF 之 Modsecurity | No root,no fruit </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">No root,no fruit</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">just do it！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/resume.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://github.com/Sword2G/sword2g.github.io/2016/06/20/WAF-Modsecurity/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sword2g">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="No root,no fruit">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                WAF 之 Modsecurity
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-06-20T21:42:26+08:00">
+                2016-06-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/WAF/" itemprop="url" rel="index">
+                    <span itemprop="name">WAF</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/06/20/WAF-Modsecurity/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/06/20/WAF-Modsecurity/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>WAF（Web Application Firewall）,Web 应用防火墙是通过执行一系列针对 HTTP/HTTPS 的安全策略来专门为 Web 应用提供保护的一款产品。<br><a id="more"></a></p>
+<h1 id="WAF-与传统防火墙"><a href="#WAF-与传统防火墙" class="headerlink" title="WAF 与传统防火墙"></a>WAF 与传统防火墙</h1><p>传统的防火墙可以根据 IP 地址或服务端口过滤数据包。但是，它对于利用合法IP地址和端口而从事的破坏活动则无能为力。而 WAF 是一种工作在应用层的、通过特定的安全策略来专门为 Web 应用提供安全防护的产品。主要是对 Web 特有入侵方式（如 DDOS 防护、SQL 注入、XML 注入、XSS 等）进行加强防护。</p>
+<h1 id="WAF-特点"><a href="#WAF-特点" class="headerlink" title="WAF 特点"></a>WAF 特点</h1><h3 id="异常协议检测"><a href="#异常协议检测" class="headerlink" title="异常协议检测"></a>异常协议检测</h3><p>Web 应用防火墙会对 HTTP 的请求进行异常检测，拒绝不符合 HTTP 标准的请求。并且，它也可以只允许 HTTP 协议的部分选项通过，从而减少攻击的影响范围。甚至，一些 Web 应用防火墙还可以严格限定 HTTP 协议中那些过于松散或未被完全制定的选项。</p>
+<h3 id="增强的输入验证"><a href="#增强的输入验证" class="headerlink" title="增强的输入验证"></a>增强的输入验证</h3><p>增强输入验证，可以有效防止网页篡改、信息泄露、木马植入等恶意网络入侵行为。从而减小 Web 服务器被攻击的可能性</p>
+<h3 id="及时补丁"><a href="#及时补丁" class="headerlink" title="及时补丁"></a>及时补丁</h3><p>可以针对漏洞及时充当虚拟补丁，及时屏蔽漏洞</p>
+<h3 id="基于规则的保护和基于异常的保护"><a href="#基于规则的保护和基于异常的保护" class="headerlink" title="基于规则的保护和基于异常的保护"></a>基于规则的保护和基于异常的保护</h3><p>基于规则的保护可以提供各种Web应用的安全规则，WAF生产商会维护这个规则库，并时时为其更新。用户可以按照这些规则对应用进行全方面检测。还有的产品可以基于合法应用数据建立模型，并以此为依据判断应用数据的异常</p>
+<h3 id="状态管理"><a href="#状态管理" class="headerlink" title="状态管理"></a>状态管理</h3><p>WAF 能够判断用户是否是第一次访问并且将请求重定向到默认登录页面并且记录事件。通过检测用户的整个操作行为我们可以更容易识别攻击。状态管理模式还能检测出异常事件（比如登陆失败），并且在达到极限值时进行处理。这对暴力攻击的识别和响应是十分有利的。</p>
+<h1 id="WAF-分类"><a href="#WAF-分类" class="headerlink" title="WAF 分类"></a>WAF 分类</h1><h3 id="硬件-WAF"><a href="#硬件-WAF" class="headerlink" title="硬件 WAF"></a>硬件 WAF</h3><p>目前安全市场上，大多数的 WAF 都属于此类。它们以一个独立的硬件设备的形态存在，支持以多种方式（如透明桥接模式、旁路模式、反向代理等）部署到网络中为后端的Web应用提供安全防护。相对于软件产品类的 WAF，这类产品的优点是性能好、功能全面、支持多种模式部署等，但它的价格通常比较贵。国内的绿盟、安恒、启明星辰等厂商生产的WAF 都属于此类。</p>
+<h3 id="软件-WAF"><a href="#软件-WAF" class="headerlink" title="软件 WAF"></a>软件 WAF</h3><p>采用纯软件的方式实现,安装在 Web 应用服务器上。这类WAF的代表有ModSecurity、Naxsi、网站安全狗等。</p>
+<h3 id="云-WAF"><a href="#云-WAF" class="headerlink" title="云 WAF"></a>云 WAF</h3><p>随着云计算技术的快速发展，使得其于云的WAF实现成为可能。国内创新工场旗下的安全宝、360的网站宝是这类WAF的典型代表。</p>
+<h1 id="ModSecurity"><a href="#ModSecurity" class="headerlink" title="ModSecurity"></a>ModSecurity</h1><p><a href="https://github.com/SpiderLabs/ModSecurity">ModSecurity</a> 是一个开源的入侵侦测与防护引擎，它主要是用于 Web 应用程序，属于 WAF，它可以作为 Apache Web 服务器的模块或是单独的应用程序来运作。</p>
+<h1 id="ModSecurity-安装"><a href="#ModSecurity-安装" class="headerlink" title="ModSecurity 安装"></a>ModSecurity 安装</h1><h3 id="安装环境"><a href="#安装环境" class="headerlink" title="安装环境"></a>安装环境</h3><pre><code>OS : Ubuntu 14.04.1 LTS
+Apache : Apache/2.4.7 (Ubuntu)
+</code></pre><h3 id="安装步骤"><a href="#安装步骤" class="headerlink" title="安装步骤"></a>安装步骤</h3><p>1 安装 apache2<br><code>sudo apt-get install apache2</code></p>
+<p>2 安装 libapache2-modsecurity 模块及其依赖包<code>sudo apt-get install libxml2 libxml2-dev libxml2-utils libaprutil1 libaprutil1-dev libapache2-modsecurity</code>，安装完成后可查看安装的 ModSecurity 版本 <code>dpkg -s libapache2-modsecurity | grep Version</code>。</p>
+<p>3 配置文件，命令<code>sudo cp /etc/modsecurity/modsecurity.conf-recommended /etc/modsecurity/modsecurity.conf</code>,重命名 <code>/etc/modsecurity/modsecurity.conf-recommended</code> 为 <code>/etc/modsecurity/modsecurity.conf</code>。</p>
+<p>4 查看日志文件<br>查看 apache2 的日志目录<code>list /var/log/apache2</code>，可以看到目录下有 access.log, error.log, other_vhosts_access.log,执行 <code>sudo service apache2 reload</code> 重启 apache2 后，查看 apache2 日志目录，可以看到新生成的日志文件 modsec_audit.log。</p>
+<p>5 添加到激活规则集<br>在 /usr/share/modsecurity-crs/ 下可以看到有如下目录 activated_rules, base_rules, experimental_rules 和 optional_rules,激活的规则集都放在 /usr/share/modsecurity-crs/activated_rules/ 中，只需在该目录下建立待启用的规则集目录的符号链接即可。</p>
+<p>如：要激活 base_rules 和 ptional_rules 中的规则集可以执行如下脚本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">cd</span> /usr/share/modsecurity-crs/base_rules  </div><div class="line"><span class="keyword">for</span> f <span class="keyword">in</span> * ;    </div><div class="line"><span class="keyword">do</span> sudo ln <span class="_">-s</span> /usr/share/modsecurity-crs/base_rules/<span class="variable">$f</span> </div><div class="line">/usr/share/modsecurity-crs/activated_rules/<span class="variable">$f</span>;   </div><div class="line"><span class="keyword">done</span></div><div class="line"></div><div class="line"><span class="built_in">cd</span> /usr/share/modsecurity-crs/optional_rules</div><div class="line"><span class="keyword">for</span> f <span class="keyword">in</span> * ;</div><div class="line"><span class="keyword">do</span> sudo ln <span class="_">-s</span> /usr/share/modsecurity-crs/optional_rules/<span class="variable">$f</span> </div><div class="line">/usr/share/modsecurity-crs/activated_rules/<span class="variable">$f</span>;</div><div class="line"><span class="keyword">done</span></div></pre></td></tr></table></figure>
+<p>6 开启拦截<br>更改配置文件 /etc/modsecurity/modsecurity.conf 中 SecRuleEngine DetectionOnly 为 On</p>
+<p>7 更改 apache2 配置文件<br>更改文件 /etc/apache2/mods-available/security2.conf，在  前添加如下两行（顺序不能弄错）<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">IncludeOptional <span class="regexp">/usr/</span>share<span class="regexp">/modsecurity-crs/</span>*.conf        </div><div class="line">IncludeOptional <span class="regexp">/usr/</span>share<span class="regexp">/modsecurity-crs/</span>activated_rules<span class="regexp">/*.conf</span></div></pre></td></tr></table></figure></p>
+<p>告知 apache2 到哪里去查找激活的规则</p>
+<p>8 启用 ModSecurity 模块</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="attribute">sudo</span> a2enmod headers</div><div class="line">sudo a2enmod security2</div></pre></td></tr></table></figure>
+<p>9 重启 apache2<br><code>sudo service apache2 restart</code></p>
+<h3 id="ModSecurity-配置"><a href="#ModSecurity-配置" class="headerlink" title="ModSecurity 配置"></a>ModSecurity 配置</h3><p>ModSecurity 中的重要配置选项</p>
+<ul>
+<li><p>SecRuleEngine On<br>打开过滤引擎开关。如果是 Off，那么下面这些都不起作用了。</p>
+</li>
+<li><p>SecRequestBodyAccess On<br>允许过滤引擎检查请求体，如果关闭该选项则 modsecurity 无法看到 post 的任何数据</p>
+</li>
+<li><p>SecRule REQUEST_HEADERS:Content-Type<br>允许解析 xml 格式的请求</p>
+</li>
+<li><p>SecRequestBodyLimit 13107200</p>
+</li>
+<li><p>SecRequestBodyNoFilesLimit 131072<br>ModSecurity允许的最大请求体的缓存区大小 SecRequestBodyLimit 为文件大小，SecRequestBodyNoFilesLimit 没有文件请求提大小</p>
+</li>
+<li><p>SecRequestBodyInMemoryLimit 131072<br>用来保存请求体的最大内存，超过后会使用硬盘空间</p>
+</li>
+<li><p>SecResponseBodyAccess On<br>允许对请求体进行检查，从而辨识错误、防止数据泄露（可能会消耗内存并且对响应产生延迟）</p>
+</li>
+<li><p>SecResponseBodyMimeType text/plain text/html text/xml<br>希望被检查的 MIME 类型</p>
+</li>
+<li><p>SecResponseBodyLimit 524288<br>ModSecurity 允许的最大响应体的缓存区大小</p>
+</li>
+<li><p>SecTmpDir /tmp/<br>存储临时文件目录</p>
+</li>
+<li><p>SecDataDir /tmp/<br>存储临时数据目录</p>
+</li>
+<li><p>SecUploadDir /opt/modsecurity/var/upload/<br>ModSecurity 用来存放拦截的上传文件</p>
+</li>
+<li><p>SecUploadKeepFiles RelevantOnly<br>配置是否保存事务处理后的拦截文件</p>
+</li>
+<li><p>SecUploadFileMode 0600<br>设置拦截的文件的 mode</p>
+</li>
+</ul>
+<h3 id="Modsecurity-处理阶段"><a href="#Modsecurity-处理阶段" class="headerlink" title="Modsecurity 处理阶段"></a>Modsecurity 处理阶段</h3><ul>
+<li><p>请求头(REQUEST_HEADERS) 阶段（Phase 1 阶段）<br>这个阶段的 modsecurity 规则会在 apache 完成请求头的读取后立即被执行（post-read-request阶段），这时，还没有读取请求体，意味着不是所有的参数都可用。<br>如果你必须让规则尽早运行，应把规则放在这个阶段（在 apache 使用这个请求做某些事前），在请求体被读取前做些事情，从而决定是否缓存这个请求体，或者决定你将希望这个请求体如何被处理（如是否以 XML 格式解析或不解析）。</p>
+</li>
+<li><p>请求体(REQUEST_BODY) 阶段（Phase 2 阶段）<br>这是通用输入分析阶段，大部分传统的应用规则不会部署在这个阶段，这个阶段你肯定能收到参数（只有读取过请求体后），在请求体阶段，ModSecurity支持三种编码类型。</p>
+<ul>
+<li><p>application/x-www-form-urlencoded - used to transfer form data</p>
+</li>
+<li><p>multipart/form-data - used for file transfers</p>
+</li>
+<li><p>text/xml - used for passing XML data<br>大部分WEB应用还没有使用其它的编码方法。</p>
+</li>
+</ul>
+</li>
+<li><p>响应头(RESPONSE_HEADERS) 阶段（Phase 3 阶段）<br>发生在响应头被发送到客户端之前。如果你想观察响应发生前就在这儿运行，如果你想使用响应头来决定你是否想缓存响应体也行。注意一些响应状态码（如 404）在请求环的早期就被 apache 管理着，我也无法触发预期。加上apache在后面的勾子上双增加了一些响应头（如日期、服务器和连接信息等），这些我们无法触发和审查。在代理配置模式下或使用phase:5(logging)工作的较好。</p>
+</li>
+<li><p>响应体(RESPONSE_BODY) 阶段（Phase 4 阶段）<br>这是通用输出分析阶段，这里你能运行规则截断响应体（当然提供缓存）。这个阶段你想检查输出的HTML信息公布、错误消息和失败的验证文字。</p>
+</li>
+<li><p>记录(LOGGING) 阶段（Phase 5 阶段）<br>在日志发生前运行的一个阶段，放在这个阶段的规则只能影响日志记录器如何执行，这个阶段可以检测 apache 记录的错误消息，在这个阶段你不能拒绝或阻断连接，因为太迟了。</p>
+</li>
+</ul>
+<h3 id="ModSecurity-测试"><a href="#ModSecurity-测试" class="headerlink" title="ModSecurity 测试"></a>ModSecurity 测试</h3><p>使用 HTTPie 发包工具测试</p>
+<p>1 <code>http http://localhost/ a==&#39;select 0x123 from user&#39;</code><br>打开 ModSecurity 日志文件/var/log/apache2/modsec_audit.log查看具体拦截情况。<br><img src="http://7xum8m.com1.z0.glb.clouddn.com/ModSecuritysql.jpg" alt=""></p>
+<p>2 测试自定义规则<br><code>sudo vim /usr/share/modsecurity-crs/activated_rules/TestRules.conf</code><br>添加如下规则,值允许上传图片</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">SecRule FILES <span class="string">"!\\.(?i:jpe?g|gif|png|bmp)$"</span> <span class="comment">"deny,tag:'WEB_ATTACK/    </span></div><div class="line">FILEUPLOAD<span class="string">',msg:'</span>upload <span class="keyword">no</span>-picture <span class="keyword">file</span><span class="string">',id:0000001,phase:2"</span></div></pre></td></tr></table></figure>
+<p>上传文件名中不允许含有0</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="attribute">SecRule</span> FILES <span class="string">"<span class="variable">@contains</span> 0"</span> <span class="string">"deny,tag:'WEB_ATTACK/      </span></div><div class="line">FILEUPLOAD',msg:'filename has null character',id:0000002,phase:2"</div></pre></td></tr></table></figure>
+<p>在 /var/www/html 下新建 upload.html</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;<span class="keyword">form</span> enctype=<span class="string">"multipart/form-data"</span> method=<span class="string">"post"</span> action=<span class="string">"http://example.com/jobs"</span>&gt;</div><div class="line">    &lt;<span class="keyword">input</span> <span class="keyword">type</span>=<span class="string">"text"</span> name=<span class="string">"name"</span> /&gt;</div><div class="line">    &lt;<span class="keyword">input</span> <span class="keyword">type</span>=<span class="string">"file"</span> name=<span class="string">"cv"</span> /&gt;</div><div class="line">    &lt;<span class="keyword">input</span> <span class="keyword">type</span>=<span class="string">"submit"</span>/&gt;</div><div class="line">&lt;/<span class="keyword">form</span>&gt;</div></pre></td></tr></table></figure>
+<p><code>http -f POST http://localhost/upload.html name=&#39;testfile&#39; cv@~/testMod/a.php</code><br>上传php文件，相关拦截日志如下<br><img src="http://7xum8m.com1.z0.glb.clouddn.com/ModSecurityphp.jpg" alt=""></p>
+<p><code>http -f POST http://localhost/upload.html name=&#39;testfile&#39; cv@~/testModSeciurity/0.png</code><br>上传0.png，相关拦截日志如下<br><img src="http://7xum8m.com1.z0.glb.clouddn.com/ModSecuritynull.jpg" alt=""></p>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a href="http://netsecurity.51cto.com/art/201004/195250_all.htm" target="_blank" rel="external">http://netsecurity.51cto.com/art/201004/195250_all.htm</a><br><a href="http://ubuntuforums.org/showthread.php?t=2219109" target="_blank" rel="external">http://ubuntuforums.org/showthread.php?t=2219109</a><br><a href="http://www.freebuf.com/articles/web/43559.html" target="_blank" rel="external">http://www.freebuf.com/articles/web/43559.html</a><br>（完）</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_wechat_pay.jpg" alt="sword2g WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_ali_pay.jpg" alt="sword2g Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Modsecurity/" rel="tag"># Modsecurity</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/06/01/C-standard-io/" rel="next" title="C Standard I/O">
+                <i class="fa fa-chevron-left"></i> C Standard I/O
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/21/HTTPie/" rel="prev" title="HTTPie">
+                HTTPie <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/06/20/WAF-Modsecurity/"
+           data-title="WAF 之 Modsecurity" data-url="https://github.com/Sword2G/sword2g.github.io/2016/06/20/WAF-Modsecurity/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg"
+               alt="sword2g" />
+          <p class="site-author-name" itemprop="name">sword2g</p>
+           
+              <p class="site-description motion-element" itemprop="description">put my notes here</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="http://sword2g.github.io/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/Sword2G" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/2816511392" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.douban.com/people/97199972/" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/birkhoff-lee" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://my.oschina.net/v5871314" title="梦回雪夜观花" target="_blank">梦回雪夜观花</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#WAF-与传统防火墙"><span class="nav-number">1.</span> <span class="nav-text">WAF 与传统防火墙</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#WAF-特点"><span class="nav-number">2.</span> <span class="nav-text">WAF 特点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#异常协议检测"><span class="nav-number">2.0.1.</span> <span class="nav-text">异常协议检测</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#增强的输入验证"><span class="nav-number">2.0.2.</span> <span class="nav-text">增强的输入验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#及时补丁"><span class="nav-number">2.0.3.</span> <span class="nav-text">及时补丁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于规则的保护和基于异常的保护"><span class="nav-number">2.0.4.</span> <span class="nav-text">基于规则的保护和基于异常的保护</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#状态管理"><span class="nav-number">2.0.5.</span> <span class="nav-text">状态管理</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#WAF-分类"><span class="nav-number">3.</span> <span class="nav-text">WAF 分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#硬件-WAF"><span class="nav-number">3.0.1.</span> <span class="nav-text">硬件 WAF</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#软件-WAF"><span class="nav-number">3.0.2.</span> <span class="nav-text">软件 WAF</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#云-WAF"><span class="nav-number">3.0.3.</span> <span class="nav-text">云 WAF</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ModSecurity"><span class="nav-number">4.</span> <span class="nav-text">ModSecurity</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ModSecurity-安装"><span class="nav-number">5.</span> <span class="nav-text">ModSecurity 安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装环境"><span class="nav-number">5.0.1.</span> <span class="nav-text">安装环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装步骤"><span class="nav-number">5.0.2.</span> <span class="nav-text">安装步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ModSecurity-配置"><span class="nav-number">5.0.3.</span> <span class="nav-text">ModSecurity 配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Modsecurity-处理阶段"><span class="nav-number">5.0.4.</span> <span class="nav-text">Modsecurity 处理阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ModSecurity-测试"><span class="nav-number">5.0.5.</span> <span class="nav-text">ModSecurity 测试</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考链接"><span class="nav-number">6.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div align="center" class="powered-by">
+
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a> 
+  and Themed by -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist</a>
+
+
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sword2g</span>
+  
+</div>
+
+
+
+
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sword2g"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

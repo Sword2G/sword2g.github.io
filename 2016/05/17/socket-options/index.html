@@ -1,0 +1,890 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Socket," />
+
+
+
+
+
+  <link rel="alternate" href="http://sword2g.github.io/atom.xml" title="No root,no fruit" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="通过套接字选项可以获得、设置套接字的行为属性。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="套接字选项">
+<meta property="og:url" content="https://github.com/Sword2G/sword2g.github.io/2016/05/17/socket-options/index.html">
+<meta property="og:site_name" content="No root,no fruit">
+<meta property="og:description" content="通过套接字选项可以获得、设置套接字的行为属性。">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/socket_optssockets_options.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/ocket_optsnagle1.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/socket_optsnagle0.jpg">
+<meta property="og:updated_time" content="2017-03-03T12:32:54.510Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="套接字选项">
+<meta name="twitter:description" content="通过套接字选项可以获得、设置套接字的行为属性。">
+<meta name="twitter:image" content="http://7xum8m.com1.z0.glb.clouddn.com/socket_optssockets_options.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/Sword2G/sword2g.github.io/2016/05/17/socket-options/"/>
+
+
+
+
+
+  <title> 套接字选项 | No root,no fruit </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">No root,no fruit</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">just do it！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/resume.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://github.com/Sword2G/sword2g.github.io/2016/05/17/socket-options/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sword2g">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="No root,no fruit">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                套接字选项
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-05-17T10:30:49+08:00">
+                2016-05-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/05/17/socket-options/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/17/socket-options/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>通过套接字选项可以获得、设置套接字的行为属性。<br><a id="more"></a></p>
+<h1 id="getsockopt-和-setsockopt-函数"><a href="#getsockopt-和-setsockopt-函数" class="headerlink" title="getsockopt 和 setsockopt 函数"></a>getsockopt 和 setsockopt 函数</h1><h2 id="函数原型"><a href="#函数原型" class="headerlink" title="函数原型"></a>函数原型</h2><p>int getsockopt(int sockfd, int level,<br>int optname, void <em>optval, socklen_t </em>optlen);</p>
+<p>int setsockopt(int sockfd, int level,<br>int optname, const void <em>optval, socklen_t </em>optlen);</p>
+<h2 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h2><blockquote>
+<p>sockfd： 已打开的套接字描述符<br>level：  指定系统中解释选项的代码。（通用套接字代码，特定于协议的代码）<br>optname：套接字选项名称<br>optval： 指向某个变量的指针，setsockopt从<em>optval（值参数）中取得选项待设置的新值，getsockopt把已获得的选项的当前值存入</em>optval（值-结果参数）中。<br>optlen： 选项类型的长度</p>
+</blockquote>
+<h1 id="套接字选项"><a href="#套接字选项" class="headerlink" title="套接字选项"></a>套接字选项</h1><p>套接字选项粗分为两大类：</p>
+<ul>
+<li>启用和禁止某个特性的二元选项</li>
+<li>取得并返回我们可以设置或检查的特定值选项</li>
+</ul>
+<h2 id="常见的套接字选项"><a href="#常见的套接字选项" class="headerlink" title="常见的套接字选项"></a>常见的套接字选项</h2><p><img src="http://7xum8m.com1.z0.glb.clouddn.com/socket_optssockets_options.jpg" alt="套接字选项"></p>
+<h2 id="SOL-SOCKET（通用套接字选项）"><a href="#SOL-SOCKET（通用套接字选项）" class="headerlink" title="SOL_SOCKET（通用套接字选项）"></a>SOL_SOCKET（通用套接字选项）</h2><h3 id="SO-BROADCAST"><a href="#SO-BROADCAST" class="headerlink" title="SO_BROADCAST"></a>SO_BROADCAST</h3><p>开启或禁止进程发送广播消息的能力，默认情况下，本选项关闭。只有数据报套接字（SOCK_DGRAM）支持广播，并且还必须在支持广播消息的网络上（以太网、令牌环网），不可能在p2p网络上广播，也不可能在基于链连接的网络上广播。</p>
+<h3 id="SO-DEBUG"><a href="#SO-DEBUG" class="headerlink" title="SO_DEBUG"></a>SO_DEBUG</h3><p>开启或禁止套接字调试功能，仅支持TCP协议。该选项打开时，内核跟踪此套接字上发送和接收的数据，并将调试信息保存到一个环形缓冲区中。可使用trpt程序进行检查。</p>
+<h3 id="SO-ERROR"><a href="#SO-ERROR" class="headerlink" title="SO_ERROR"></a>SO_ERROR</h3><p>通过该套接字获得套接字错误。<br>当套接字发生错误时，源自 Berkeley 的内核将内核中该套接字的 so_error 变量设置为标准的 Unix_Exxx 的值。<br>内核以两种方式通知用户进程：</p>
+<ul>
+<li>使用 select，进程阻塞在 select，函数返回 -1,。无论是检查可读还是可写条件，select 均会返回并设置其中一个或两个条件</li>
+<li>使用信号驱动 I/O，给进程或进程组发送一个 SIGIO 信号</li>
+</ul>
+<h3 id="SO-DONTROUTE"><a href="#SO-DONTROUTE" class="headerlink" title="SO_DONTROUTE"></a>SO_DONTROUTE</h3><p>规定底层的分组将绕过底层协议的正常路由机制。。分组将按照发送数据的目的地址和子网掩码选择一个合适的网络接口进行发送。</p>
+<h3 id="SO-KEEPALIVE"><a href="#SO-KEEPALIVE" class="headerlink" title="SO_KEEPALIVE"></a>SO_KEEPALIVE</h3><p>如果在 2 小时内该套接字的任一方向没有数据交换，TCP就发送探测报文。<br>对端可能有一下三种情况发生：</p>
+<ul>
+<li>对端以期望的ACK响应</li>
+<li>对端以RST响应</li>
+<li>对端没有响应 ==&gt; 两两相隔 75s 另外发送 8 个探测报文</li>
+</ul>
+<h3 id="SO-LINGER"><a href="#SO-LINGER" class="headerlink" title="SO_LINGER"></a>SO_LINGER</h3><p>指定close函数对面向连接的协议如何操作。</p>
+<h4 id="linger数据结构"><a href="#linger数据结构" class="headerlink" title="linger数据结构"></a>linger数据结构</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;sys/socket.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="keyword">struct</span> linger&#123;</div><div class="line">	<span class="keyword">int</span> l_onoff;</div><div class="line">	<span class="keyword">int</span> l_linger;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>l_onoff 为 0，套接字该选项关闭，默认情况。close函数立即返回，如果套接字发送缓冲区中还有数据，系统试着把数据发送给对端。存在无法确认是否发送成功的问题。</li>
+<li>l_onoff 非 0 且 l_linger 为 0 。丢弃发送缓冲区中的数据，并发送 RST 给对端。 </li>
+<li>l_onoff 非 0 且 l_linger 非 0 。内核将拖延一段时间，如果发送缓冲区中仍然残留数据，进程投入睡眠（ close 阻塞），直到数据发送完成<strong>并且被对方确认</strong>或者超时。如果在数据发送完并确认之前超时，close 返回 EWOULDBLOCK ，close成功仅仅代表先前发送的数据已经被对端TCP确认，但是依然存在无法确认应用程序是否成功读取数据的问题。需要使用应用级的 ACK。</li>
+</ul>
+<h3 id="SO-RCVBUF-和-SO-SNDBUF"><a href="#SO-RCVBUF-和-SO-SNDBUF" class="headerlink" title="SO_RCVBUF 和 SO_SNDBUF"></a>SO_RCVBUF 和 SO_SNDBUF</h3><p>设置套接字接收发送缓冲区大小（在内核中）。</p>
+<ul>
+<li>UDP 发送缓冲区中的数据，发送后就可以丢弃，接收缓冲区中的数据需要等待应用程序读取，UDP 没有流量控制，如果发送的数据量大于缓冲区大小，则丢弃数据。</li>
+<li>TCP 有流量控制，接收缓冲区大小就是滑动窗口大小。接受缓冲区不可能溢出，因为不允许对端发送超过本端所通告窗口的大小，对于对端无视通知大小发送的数据，直接丢弃。</li>
+</ul>
+<p>该选项，客户端在 connect 之前设置，服务器端在 listen 之前给监听套接字设置。</p>
+<h3 id="SO-RCVLOWAT-和-SO-SNDLOWAT"><a href="#SO-RCVLOWAT-和-SO-SNDLOWAT" class="headerlink" title="SO_RCVLOWAT 和 SO_SNDLOWAT"></a>SO_RCVLOWAT 和 SO_SNDLOWAT</h3><p>设置每个套接字的接收低水位线和发送低水位线。它们由 select 函数使用</p>
+<h3 id="SO-REUSEADDR"><a href="#SO-REUSEADDR" class="headerlink" title="SO_REUSEADDR"></a>SO_REUSEADDR</h3><p>允许重复使用本地地址和端口。</p>
+<h2 id="IPPROTO-IP（IPv4套接字选项）"><a href="#IPPROTO-IP（IPv4套接字选项）" class="headerlink" title="IPPROTO_IP（IPv4套接字选项）"></a>IPPROTO_IP（IPv4套接字选项）</h2><h3 id="IP-HDRINCL"><a href="#IP-HDRINCL" class="headerlink" title="IP_HDRINCL"></a>IP_HDRINCL</h3><p>一般情况下，Linux内黑会自动计算和填充IP头部数据。如果套接字是一个原始套接字，则IP头部需要用户手动填充。通常在用户自定义数据包格式的时候使用。注意，一旦该选项生效，用户发送的IP数据包将不在进行分片。因此用户的数据包不能太大，否则网卡不能发送。</p>
+<h2 id="IPPROTO-TCP（TCP套接字选项）"><a href="#IPPROTO-TCP（TCP套接字选项）" class="headerlink" title="IPPROTO_TCP（TCP套接字选项）"></a>IPPROTO_TCP（TCP套接字选项）</h2><h3 id="TCP-MAXSEG"><a href="#TCP-MAXSEG" class="headerlink" title="TCP_MAXSEG"></a>TCP_MAXSEG</h3><p>获得/设置 TCP 连接的最大分节大小（MSS）</p>
+<h3 id="TCP-NODELY"><a href="#TCP-NODELY" class="headerlink" title="TCP_NODELY"></a>TCP_NODELY</h3><p>开启本选项将禁止Nagle算法</p>
+<p>####　Nagle算法<br>Nagle算法的目的在于减少广域网上的小分组（小于MSS的分组）数目。<br>Nagle算法的基本原理如下：</p>
+<ul>
+<li><p>尽可能的发送最大大小分组，防止一个连接在任何时刻有多个小分组待确认。<br><img src="http://7xum8m.com1.z0.glb.clouddn.com/ocket_optsnagle1.jpg" alt="Nagle算法"><br><img src="http://7xum8m.com1.z0.glb.clouddn.com/socket_optsnagle0.jpg" alt="禁止Nagle算法"></p>
+</li>
+<li><p>ACK 延迟算法（捎带确认）。TCP 在接收到数据后并不马上发送 ACK 确认，而是等待一小段时间，然后才发送 ACK<br>以期待这一小段时间内自己有数据发送到对端，被延迟的 ACK 就可以由这段数据捎带，从而省略一个 TCP 报文</p>
+</li>
+</ul>
+<h4 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h4><p>对于服务器不在相反方向产生数据以携带 ACK 的客户来说，ACK 延迟算法存在明显的延迟，因为客户需要等到 ACK 延迟定时器超时才会收到 ACK 确认，从而继续发送数据，此时需要禁止Nagle算法。</p>
+<h1 id="参考书籍"><a href="#参考书籍" class="headerlink" title="参考书籍"></a>参考书籍</h1><p><a href="https://book.douban.com/subject/1500149/" target="_blank" rel="external">UNIX 网络编程</a><br><a href="https://book.douban.com/subject/4189500/" target="_blank" rel="external">Linux 网络编程</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_wechat_pay.jpg" alt="sword2g WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_ali_pay.jpg" alt="sword2g Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Socket/" rel="tag"># Socket</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/13/select-poll-epoll/" rel="next" title="I/O多路复用select、poll、epoll">
+                <i class="fa fa-chevron-left"></i> I/O多路复用select、poll、epoll
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/26/syslog/" rel="prev" title="Syslog">
+                Syslog <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/05/17/socket-options/"
+           data-title="套接字选项" data-url="https://github.com/Sword2G/sword2g.github.io/2016/05/17/socket-options/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg"
+               alt="sword2g" />
+          <p class="site-author-name" itemprop="name">sword2g</p>
+           
+              <p class="site-description motion-element" itemprop="description">put my notes here</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="http://sword2g.github.io/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/Sword2G" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/2816511392" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.douban.com/people/97199972/" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/birkhoff-lee" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://my.oschina.net/v5871314" title="梦回雪夜观花" target="_blank">梦回雪夜观花</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#getsockopt-和-setsockopt-函数"><span class="nav-number">1.</span> <span class="nav-text">getsockopt 和 setsockopt 函数</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#函数原型"><span class="nav-number">1.1.</span> <span class="nav-text">函数原型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参数"><span class="nav-number">1.2.</span> <span class="nav-text">参数</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#套接字选项"><span class="nav-number">2.</span> <span class="nav-text">套接字选项</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#常见的套接字选项"><span class="nav-number">2.1.</span> <span class="nav-text">常见的套接字选项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SOL-SOCKET（通用套接字选项）"><span class="nav-number">2.2.</span> <span class="nav-text">SOL_SOCKET（通用套接字选项）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SO-BROADCAST"><span class="nav-number">2.2.1.</span> <span class="nav-text">SO_BROADCAST</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SO-DEBUG"><span class="nav-number">2.2.2.</span> <span class="nav-text">SO_DEBUG</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SO-ERROR"><span class="nav-number">2.2.3.</span> <span class="nav-text">SO_ERROR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SO-DONTROUTE"><span class="nav-number">2.2.4.</span> <span class="nav-text">SO_DONTROUTE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SO-KEEPALIVE"><span class="nav-number">2.2.5.</span> <span class="nav-text">SO_KEEPALIVE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SO-LINGER"><span class="nav-number">2.2.6.</span> <span class="nav-text">SO_LINGER</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#linger数据结构"><span class="nav-number">2.2.6.1.</span> <span class="nav-text">linger数据结构</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SO-RCVBUF-和-SO-SNDBUF"><span class="nav-number">2.2.7.</span> <span class="nav-text">SO_RCVBUF 和 SO_SNDBUF</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SO-RCVLOWAT-和-SO-SNDLOWAT"><span class="nav-number">2.2.8.</span> <span class="nav-text">SO_RCVLOWAT 和 SO_SNDLOWAT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SO-REUSEADDR"><span class="nav-number">2.2.9.</span> <span class="nav-text">SO_REUSEADDR</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IPPROTO-IP（IPv4套接字选项）"><span class="nav-number">2.3.</span> <span class="nav-text">IPPROTO_IP（IPv4套接字选项）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IP-HDRINCL"><span class="nav-number">2.3.1.</span> <span class="nav-text">IP_HDRINCL</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IPPROTO-TCP（TCP套接字选项）"><span class="nav-number">2.4.</span> <span class="nav-text">IPPROTO_TCP（TCP套接字选项）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-MAXSEG"><span class="nav-number">2.4.1.</span> <span class="nav-text">TCP_MAXSEG</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-NODELY"><span class="nav-number">2.4.2.</span> <span class="nav-text">TCP_NODELY</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#应用场景"><span class="nav-number">2.4.2.1.</span> <span class="nav-text">应用场景</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考书籍"><span class="nav-number">3.</span> <span class="nav-text">参考书籍</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div align="center" class="powered-by">
+
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a> 
+  and Themed by -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist</a>
+
+
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sword2g</span>
+  
+</div>
+
+
+
+
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sword2g"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

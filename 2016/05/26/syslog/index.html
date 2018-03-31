@@ -1,0 +1,860 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Syslog 协议," />
+
+
+
+
+
+  <link rel="alternate" href="http://sword2g.github.io/atom.xml" title="No root,no fruit" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="在类 Unix 操作系统上，syslog 广泛应用于系统日志。该机制负责发送、记录系统内核、守护进程及应用程序所产生的信息，它由 syslogd 守护进程、syslog 调用和配置文件 /etc/syslog.conf 三部分组成。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Syslog">
+<meta property="og:url" content="https://github.com/Sword2G/sword2g.github.io/2016/05/26/syslog/index.html">
+<meta property="og:site_name" content="No root,no fruit">
+<meta property="og:description" content="在类 Unix 操作系统上，syslog 广泛应用于系统日志。该机制负责发送、记录系统内核、守护进程及应用程序所产生的信息，它由 syslogd 守护进程、syslog 调用和配置文件 /etc/syslog.conf 三部分组成。">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/hexo_syslog_syslog_level.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/hexo_syslog_syslog_level.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/hexo_syslog_log_type.jpg">
+<meta property="og:image" content="http://7xum8m.com1.z0.glb.clouddn.com/hexo_syslog_log_priority.jpg">
+<meta property="og:updated_time" content="2016-12-28T14:59:10.565Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Syslog">
+<meta name="twitter:description" content="在类 Unix 操作系统上，syslog 广泛应用于系统日志。该机制负责发送、记录系统内核、守护进程及应用程序所产生的信息，它由 syslogd 守护进程、syslog 调用和配置文件 /etc/syslog.conf 三部分组成。">
+<meta name="twitter:image" content="http://7xum8m.com1.z0.glb.clouddn.com/hexo_syslog_syslog_level.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/Sword2G/sword2g.github.io/2016/05/26/syslog/"/>
+
+
+
+
+
+  <title> Syslog | No root,no fruit </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">No root,no fruit</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">just do it！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/resume.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://github.com/Sword2G/sword2g.github.io/2016/05/26/syslog/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sword2g">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="No root,no fruit">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Syslog
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-05-26T21:00:55+08:00">
+                2016-05-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/05/26/syslog/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/26/syslog/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在类 Unix 操作系统上，syslog 广泛应用于系统日志。该机制负责发送、记录系统内核、守护进程及应用程序所产生的信息，它由 syslogd 守护进程、syslog 调用和配置文件 /etc/syslog.conf 三部分组成。<br><a id="more"></a></p>
+<h1 id="syslogd-守护进程"><a href="#syslogd-守护进程" class="headerlink" title="syslogd 守护进程"></a>syslogd 守护进程</h1><p>syslog协议分为客户端和服务器端，客户端是产生日志消息的一方，而服务器端负责接收客户端发送来的日志消息，并做出保存到特定的日志文件中或者其他方式的处理。<br>在Unix中，常见的 syslog 服务器端程序是 syslogd 守护程序。</p>
+<h2 id="syslogd-启动方式"><a href="#syslogd-启动方式" class="headerlink" title="syslogd 启动方式"></a>syslogd 启动方式</h2><p>Unix 系统中的 syslogd 守护进程通常由某个系统初始化脚本启动，在工作期间一直运行。</p>
+<h2 id="syslogd-启动步骤"><a href="#syslogd-启动步骤" class="headerlink" title="syslogd 启动步骤"></a>syslogd 启动步骤</h2><p>1 读取配置文件。默认的配置文件为 /etc/syslog.conf，该配置文件指定了本守护进程可能收取的各种日志消息应该如何处理（如添加到一个文件、输出到控制台、写到指定用户的登录窗口，转发到另一个主机的 syslogd 进程）。<br>2 创建一个 Unix 域套接字，给他捆绑路径名 /dev/log<br>3 创建一个 UDP 套接字，给他捆绑端口 514<br>4 打开路径名 /dev/klog，记录来自内核的日志消息</p>
+<h1 id="syslog-接口调用"><a href="#syslog-接口调用" class="headerlink" title="syslog 接口调用"></a>syslog 接口调用</h1><h2 id="函数原型"><a href="#函数原型" class="headerlink" title="函数原型"></a>函数原型</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;syslog.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;syslog.h&gt;</span></span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">openlog</span> <span class="params">(<span class="keyword">char</span>*ident, <span class="keyword">int</span> option, <span class="keyword">int</span> facility)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">syslog</span><span class="params">(<span class="keyword">int</span> priority, <span class="keyword">char</span>* format, ……)</span></span></div><div class="line"><span class="keyword">void</span> <span class="title">closelog</span><span class="params">(<span class="keyword">void</span>)</span>;</div></pre></td></tr></table></figure>
+<h2 id="openlog"><a href="#openlog" class="headerlink" title="openlog"></a>openlog</h2><p>openlog 是可选择的。如果不调用 openlog ，则在第一次调用 syslog 的时候自动调用 openlog</p>
+<h3 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h3><p>ident 参数是一个由 syslog 冠于每个日志消息之前的字符串，一般是程序名称；<br>options 参数由LOG_CONS、LOG_NDELAY、LOG_PERROR、LOG_PID中的一个或者多个标志位逻辑或构成；</p>
+<pre><code>LOG_CONS 若无法发送到 syslogd 守护进程则登记到控制台
+LOG_NDELAY openlog 被调用时，通常不立即打开 UNIX 域套接字，直到 syslog 函数调用时才打开，该参数指定立即打开
+LOG_PERROR 既发送到 syslogd，又登记到标准错误输出
+LOG_PID 每条消息都登记进程pid
+</code></pre><p>facility 为没有指定设施的后续 syslog() 调用指定一个默认值。</p>
+<h2 id="syslog"><a href="#syslog" class="headerlink" title="syslog"></a>syslog</h2><p>syslog 产生一个日志消息，priority 参数是 facility（标识消息发送进程） 和 level（标识消息级别）的组合。<br><strong>P.S.默认的 level 是 LOG_NOTICE，默认的 facility 是 LOG_USER<br>syslog 中的 format 类似于 printf，增设了 %m ，它被替换成当前 errno 对应的出错消息</strong><br><img src="http://7xum8m.com1.z0.glb.clouddn.com/hexo_syslog_syslog_level.jpg" alt="facility"><br><img src="http://7xum8m.com1.z0.glb.clouddn.com/hexo_syslog_syslog_level.jpg" alt="level"></p>
+<h2 id="closelog"><a href="#closelog" class="headerlink" title="closelog"></a>closelog</h2><p>应用进程不再需要发送日志消息是关闭</p>
+<h1 id="配置文件-etc-syslog-conf"><a href="#配置文件-etc-syslog-conf" class="headerlink" title="配置文件 /etc/syslog.conf"></a>配置文件 /etc/syslog.conf</h1><p>对每类消息提供一个选择域和一个动作域，选择域指明消息的类型和优先级（syslogd 将记录一个拥有相同或更高优先级的消息），动作域指明syslogd 接收到一个与选择标准相匹配的消息时所执行的动作，这些域由 tab 隔开。<br>syslog.conf 行的基本语法是：消息类型.优先级 动作域</p>
+<h2 id="消息类型"><a href="#消息类型" class="headerlink" title="消息类型"></a>消息类型</h2><p><img src="http://7xum8m.com1.z0.glb.clouddn.com/hexo_syslog_log_type.jpg" alt="log_type"></p>
+<h2 id="优先级"><a href="#优先级" class="headerlink" title="优先级"></a>优先级</h2><p><img src="http://7xum8m.com1.z0.glb.clouddn.com/hexo_syslog_log_priority.jpg" alt="log_priority"></p>
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><pre><code>kern.* /dev/console
+local17.debug /var/log/cisco.log
+所有的内核消息登记到控制台，来自 local17 的所有 debug 消息添加到 /var/log/cisco.log
+</code></pre><h1 id="syslog-应用场景"><a href="#syslog-应用场景" class="headerlink" title="syslog 应用场景"></a>syslog 应用场景</h1><p>网络管理工具<br>安全管理系统<br>日志审计系统<br>可以让任何事件都以网络行为日志的方式登记到一台或多台服务器上，以备后台数据库用off-line(离线) 方式分析远端设备事件，追踪掌握与设备和网络有关的状况并作响应<br>大多数守护进程的日志信息都使用 syslog 设施</p>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a href="http://blog.chinaunix.net/uid-25120309-id-3359929.html" target="_blank" rel="external">http://blog.chinaunix.net/uid-25120309-id-3359929.html</a><br><a href="http://blog.csdn.net/tonyxf121/article/details/7934824" target="_blank" rel="external">http://blog.csdn.net/tonyxf121/article/details/7934824</a><br>（完）</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_wechat_pay.jpg" alt="sword2g WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://7xum8m.com1.z0.glb.clouddn.com/pay_ali_pay.jpg" alt="sword2g Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Syslog-协议/" rel="tag"># Syslog 协议</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/17/socket-options/" rel="next" title="套接字选项">
+                <i class="fa fa-chevron-left"></i> 套接字选项
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/01/C-standard-io/" rel="prev" title="C Standard I/O">
+                C Standard I/O <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/05/26/syslog/"
+           data-title="Syslog" data-url="https://github.com/Sword2G/sword2g.github.io/2016/05/26/syslog/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xum8m.com1.z0.glb.clouddn.com/avataravatar.jpg"
+               alt="sword2g" />
+          <p class="site-author-name" itemprop="name">sword2g</p>
+           
+              <p class="site-description motion-element" itemprop="description">put my notes here</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="http://sword2g.github.io/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/Sword2G" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/2816511392" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.douban.com/people/97199972/" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.zhihu.com/people/birkhoff-lee" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://my.oschina.net/v5871314" title="梦回雪夜观花" target="_blank">梦回雪夜观花</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#syslogd-守护进程"><span class="nav-number">1.</span> <span class="nav-text">syslogd 守护进程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#syslogd-启动方式"><span class="nav-number">1.1.</span> <span class="nav-text">syslogd 启动方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#syslogd-启动步骤"><span class="nav-number">1.2.</span> <span class="nav-text">syslogd 启动步骤</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#syslog-接口调用"><span class="nav-number">2.</span> <span class="nav-text">syslog 接口调用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#函数原型"><span class="nav-number">2.1.</span> <span class="nav-text">函数原型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#openlog"><span class="nav-number">2.2.</span> <span class="nav-text">openlog</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#参数"><span class="nav-number">2.2.1.</span> <span class="nav-text">参数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#syslog"><span class="nav-number">2.3.</span> <span class="nav-text">syslog</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#closelog"><span class="nav-number">2.4.</span> <span class="nav-text">closelog</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置文件-etc-syslog-conf"><span class="nav-number">3.</span> <span class="nav-text">配置文件 /etc/syslog.conf</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#消息类型"><span class="nav-number">3.1.</span> <span class="nav-text">消息类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优先级"><span class="nav-number">3.2.</span> <span class="nav-text">优先级</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#例子"><span class="nav-number">3.3.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#syslog-应用场景"><span class="nav-number">4.</span> <span class="nav-text">syslog 应用场景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考链接"><span class="nav-number">5.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div align="center" class="powered-by">
+
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a> 
+  and Themed by -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist</a>
+
+
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sword2g</span>
+  
+</div>
+
+
+
+
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sword2g"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>
